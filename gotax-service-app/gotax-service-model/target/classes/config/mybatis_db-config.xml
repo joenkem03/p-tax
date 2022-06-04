@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="config/database.properties" />
+<!--    <settings>-->
+<!--        <setting name="logImpl" value="LOG4J2"/>-->
+<!--&lt;!&ndash;        <setting name="logImpl" value="SLF4J"/>&ndash;&gt;-->
+<!--&lt;!&ndash;        <setting name="logImpl" value="JDK_LOGGING"/>&ndash;&gt;-->
+<!--    </settings>-->
+    <typeAliases>
+        <typeAlias alias="User" type="org.bizzdeskgroup.models.User"/>
+        <typeAlias alias="UserDto" type="org.bizzdeskgroup.Dtos.Query.UserDto"/>
+        <typeAlias alias="TaxPayerDto" type="org.bizzdeskgroup.Dtos.Query.TaxPayerDto"/>
+        <typeAlias alias="Mda" type="org.bizzdeskgroup.models.Mda"/>
+        <typeAlias alias="MdaOffice" type="org.bizzdeskgroup.models.MdaOffice"/>
+        <typeAlias alias="MdaUser" type="org.bizzdeskgroup.models.MdaUser"/>
+        <typeAlias alias="MdaService" type="org.bizzdeskgroup.models.MdaService"/>
+        <typeAlias alias="MdaDto" type="org.bizzdeskgroup.Dtos.Query.MdaDto"/>
+        <typeAlias alias="MdaOfficeDto" type="org.bizzdeskgroup.Dtos.Query.MdaOfficeDto"/>
+        <typeAlias alias="MdaServiceDto" type="org.bizzdeskgroup.Dtos.Query.MdaServiceDto"/>
+        <typeAlias alias="PosMetaDto" type="org.bizzdeskgroup.Dtos.Query.PosMetaDto"/>
+        <typeAlias alias="PosDto" type="org.bizzdeskgroup.Dtos.Query.PosDto"/>
+        <typeAlias alias="PosMeta" type="org.bizzdeskgroup.models.PosMeta"/>
+        <typeAlias alias="Pos" type="org.bizzdeskgroup.models.Pos"/>
+        <typeAlias alias="Assessment" type="org.bizzdeskgroup.models.Assessment"/>
+        <typeAlias alias="AssessmentDto" type="org.bizzdeskgroup.Dtos.Query.AssessmentDto"/>
+        <typeAlias alias="AssessmentInDto" type="org.bizzdeskgroup.Dtos.Query.AssessmentInDto"/>
+        <typeAlias alias="PosTransaction" type="org.bizzdeskgroup.models.PosTransaction"/>
+        <typeAlias alias="Transaction" type="org.bizzdeskgroup.models.Transaction"/>
+        <typeAlias alias="PosTransactionDto" type="org.bizzdeskgroup.Dtos.Query.PosTransactionDto"/>
+        <typeAlias alias="TransactionDto" type="org.bizzdeskgroup.Dtos.Query.TransactionDto"/>
+        <typeAlias alias="AdminTransactionDto" type="org.bizzdeskgroup.Dtos.Query.AdminTransactionDto"/>
+        <typeAlias alias="Individual" type="org.bizzdeskgroup.models.Individual"/>
+        <typeAlias alias="NonIndividual" type="org.bizzdeskgroup.models.NonIndividual"/>
+        <typeAlias alias="IndividualDto" type="org.bizzdeskgroup.Dtos.Query.IndividualDto"/>
+        <typeAlias alias="NonIndividualDto" type="org.bizzdeskgroup.Dtos.Query.NonIndividualDto"/>
+        <typeAlias alias="UserPageFinder" type="org.bizzdeskgroup.Dtos.Query.UserPageFinder"/>
+        <typeAlias alias="PageFinder" type="org.bizzdeskgroup.Dtos.Query.PageFinder"/>
+        <typeAlias alias="Remittance" type="org.bizzdeskgroup.models.Remittance"/>
+        <typeAlias alias="RemittanceIntDto" type="org.bizzdeskgroup.Dtos.Query.RemittanceIntDto"/>
+        <typeAlias alias="RemittanceDto" type="org.bizzdeskgroup.Dtos.Query.RemittanceDto"/>
+        <typeAlias alias="IntRemittanceResponseDto" type="org.bizzdeskgroup.Dtos.Query.IntRemittanceResponseDto"/>
+        <typeAlias alias="UserMdaDto" type="org.bizzdeskgroup.Dtos.Query.UserMdaDto"/>
+        <typeAlias alias="Business" type="org.bizzdeskgroup.models.Business"/>
+        <typeAlias alias="StateDto" type="org.bizzdeskgroup.Dtos.Query.StateDto"/>
+        <typeAlias alias="LgaDto" type="org.bizzdeskgroup.Dtos.Query.LgaDto"/>
+        <typeAlias alias="AllLgaDto" type="org.bizzdeskgroup.Dtos.Query.AllLgaDto"/>
+        <typeAlias alias="BusinessDto" type="org.bizzdeskgroup.Dtos.Query.BusinessDto"/>
+        <typeAlias alias="CreateBusinessDto" type="org.bizzdeskgroup.Dtos.Command.CreateBusinessDto"/>
+        <typeAlias alias="BusinessUser" type="org.bizzdeskgroup.models.BusinessUser"/>
+        <typeAlias alias="MonthlyTransactionsDto" type="org.bizzdeskgroup.Dtos.Query.MonthlyTransactionsDto"/>
+        <typeAlias alias="DailyTransactionsDto" type="org.bizzdeskgroup.Dtos.Query.DailyTransactionsDto"/>
+        <typeAlias alias="UserProjectDto" type="org.bizzdeskgroup.Dtos.Query.UserProjectDto"/>
+        <typeAlias alias="Invoice" type="org.bizzdeskgroup.models.Invoice"/>
+        <typeAlias alias="InvoiceDto" type="org.bizzdeskgroup.Dtos.Query.InvoiceDto"/>
+        <typeAlias alias="InvoiceIntDto" type="org.bizzdeskgroup.Dtos.Query.InvoiceIntDto"/>
+        <typeAlias alias="InvoiceTinDto" type="org.bizzdeskgroup.Dtos.Query.InvoiceTinDto"/>
+        <typeAlias alias="ActivatePosDto" type="org.bizzdeskgroup.Dtos.Command.ActivatePosDto"/>
+        <typeAlias alias="UpdateBusinessDto" type="org.bizzdeskgroup.Dtos.Command.UpdateBusinessDto"/>
+        <typeAlias alias="ProjectSummary" type="org.bizzdeskgroup.Dtos.Query.ProjectSummary"/>
+        <typeAlias alias="TransactionMonthlySummaryDto" type="org.bizzdeskgroup.Dtos.Query.TransactionMonthlySummaryDto"/>
+        <typeAlias alias="TransactionChannelSummaryDto" type="org.bizzdeskgroup.Dtos.Query.TransactionChannelSummaryDto"/>
+        <typeAlias alias="TransactionMonthlyPieDto" type="org.bizzdeskgroup.Dtos.Query.TransactionMonthlyPieDto"/>
+        <typeAlias alias="PosSummaryListDto" type="org.bizzdeskgroup.Dtos.Query.PosSummaryListDto"/>
+        <typeAlias alias="AssessmentSummaryListDto" type="org.bizzdeskgroup.Dtos.Query.AssessmentSummaryListDto"/>
+        <typeAlias alias="ObjSummaryListDto" type="org.bizzdeskgroup.Dtos.Query.ObjSummaryListDto"/>
+        <typeAlias alias="RemitSummaryListDto" type="org.bizzdeskgroup.Dtos.Query.RemitSummaryListDto"/>
+<!--        <typeAlias alias="CreateBusPayChannelDto" type="org.bizzdeskgroup.Dtos.Command.CreateBusPayChannelDto"/>-->
+        <typeAlias alias="NewChangeReqDto" type="org.bizzdeskgroup.Dtos.Command.NewChangeReqDto"/>
+        <typeAlias alias="ActivityLogDto" type="org.bizzdeskgroup.Dtos.Query.ActivityLogDto"/>
+        <typeAlias alias="ActivityLog" type="org.bizzdeskgroup.models.ActivityLog"/>
+        <typeAlias alias="ChangeReqDto" type="org.bizzdeskgroup.Dtos.Query.ChangeReqDto"/>
+        <typeAlias alias="ChangeReq" type="org.bizzdeskgroup.models.ChangeReq"/>
+        <typeAlias alias="UpdateChangeReqDto" type="org.bizzdeskgroup.Dtos.Command.UpdateChangeReqDto"/>
+        <typeAlias alias="PaymentChannel" type="org.bizzdeskgroup.models.PaymentChannel"/>
+        <typeAlias alias="BusinessPaymentChannel" type="org.bizzdeskgroup.models.BusinessPaymentChannel"/>
+        <typeAlias alias="PaymentChannelDto" type="org.bizzdeskgroup.Dtos.Query.PaymentChannelDto"/>
+        <typeAlias alias="BusinessPaymentChannelDto" type="org.bizzdeskgroup.Dtos.Query.BusinessPaymentChannelDto"/>
+        <typeAlias alias="UserSearchDto" type="org.bizzdeskgroup.Dtos.Query.UserSearchDto"/>
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="poolMaximumActiveConnections" value="1000"/>
+                <property name="driver" value="${database.driver}" />
+                <property name="url" value="${database.url}" />
+                <property name="username" value="${database.username}" />
+                <property name="password" value="${database.password}" />
+                <property name="poolPingQuery" value="SELECT NOW()" />
+                <property name="poolPingEnabled" value="true" />
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+<!--        <package name="org.bizzdeskgroup.sqlmapper"/>-->
+<!--        <mapper resource="org.bizzdeskgroup.sqlmapper.user" />-->
+        <mapper resource="mapper/user.xml" />
+        <mapper resource="mapper/userDto.xml" />
+        <mapper resource="mapper/mdaDto.xml" />
+        <mapper resource="mapper/mdaOfficeDto.xml" />
+        <mapper resource="mapper/mdaServiceDto.xml" />
+        <mapper resource="mapper/mdaOffice.xml" />
+        <mapper resource="mapper/mdaService.xml" />
+        <mapper resource="mapper/mdaUser.xml" />
+        <mapper resource="mapper/mda.xml" />
+        <mapper resource="mapper/pos.xml" />
+        <mapper resource="mapper/posMeta.xml" />
+        <mapper resource="mapper/assessment.xml"/>
+        <mapper resource="mapper/individual.xml"/>
+        <mapper resource="mapper/nonIndividual.xml"/>
+        <mapper resource="mapper/posTransaction.xml"/>
+        <mapper resource="mapper/transaction.xml"/>
+        <mapper resource="mapper/remittance.xml"/>
+        <mapper resource="mapper/business.xml"/>
+        <mapper resource="mapper/businessUser.xml"/>
+        <mapper resource="mapper/monthlyTrans.xml"/>
+        <mapper resource="mapper/invoice.xml"/>
+        <mapper resource="mapper/changesAudit.xml"/>
+
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.user"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.userDto"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mda"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mdaOffice"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mdaUser"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mdaService"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mdaDto"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mdaOfficeDto"/>-->
+<!--        <mapper class="org.bizzdeskgroup.sqlmapper.mdaServiceDto"/>-->
+
+    </mappers>
+</configuration>

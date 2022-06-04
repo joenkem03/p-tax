@@ -1,0 +1,78 @@
+kumuluzee:
+  name: paysuretax-service
+  env:
+    name: dev
+  version: 1.0.0
+  server:
+#    base-url: http://127.0.0.1:8020
+#    base-url: http://20.55.53.97:7001 java -cp target/classes;target/dependency/* com.kumuluz.ee.EeApplication
+#    base-url: http://localhost:8020
+#    base-url: http://185.4.176.160:7001
+#    base-url: https://tax-api.paysure.ng
+    base-url: https://tax-api.paysure.ng:7001
+    https:
+      enabled: true
+      port: 7001
+      keystore-path: C:\Users\joseph.okonji\Desktop\tax\tax-apikeystore.jks
+      keystore-password: taxPaySure
+      key-password: taxPaySure
+    http:
+      port: 8020
+#      port: 7001
+#  cors-filter:
+#    servlet:
+#      allow-generic-http-requests: true
+#      allow-origin: "*"
+#      supported-methods: "POST, GET, PUT, DELETE, HEAD, OPTIONS"
+#      max-age: -1
+#      allow-subdomains: true
+#  logs:
+#    config-file: '<?xml version="1.0" encoding="UTF-8"?>
+#      <Configuration name="gotax_log">
+#      <Appenders>
+#      <Console name="console" target="SYSTEM_OUT">
+#      <PatternLayout pattern="%d %p %marker %m %X %ex %n"/>
+#      </Console>
+#      </Appenders>
+#      <Loggers>
+#
+#      <logger name="org.apache.ibatis">
+#      <level value="debug" />
+#
+#
+#      <appender-ref ref="debug" />
+#      </logger>
+#
+#      <logger name="java.sql">
+#      <level value="debug" />
+#
+#
+#      <appender-ref ref="debug" />
+#      </logger>
+#
+#      <logger name="java.sql.Statement">
+#      <level value="debug" />
+#
+#
+#      <appender-ref ref="debug" />
+#      </logger>
+#                   <logger name="org.bizzdeskgroup.Dtos.Query.UserDto" additivity="false"> <!-- <==== define the log level for your own mapper -->
+#                       <level value="DEBUG"/>
+#                   <appender-ref ref="console"/>
+#                   </logger>
+#                   <logger name="org.bizzdeskgroup.models.User" additivity="false"> <!-- <==== define the log level for your own mapper -->
+#                       <level value="DEBUG"/>
+#                       <appender-ref ref="console"/>
+#               </logger>
+#      </Loggers>
+#      </Configuration>'
+  #    config-file-location: ../../../../gotax-service-model/src/main/resources/config/log4j.xml
+
+  swagger:
+    enabled: true
+    ui:
+      enabled: true
+  jwt-auth:
+    public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuRJBnLd9S6dkJKrpPEB+p3EZ2yOwEfkF99UvCGe5m8ZmjwiHVcY7HnTKAaHSP+G6T0Ft7DYGejQExMq77AvqDpZusNwWhOF6i8fFQZCT/bX+s0Qb3arEzgAmxPfXLNjQ6Ma7wrISdM2B8x43NO+8N2GxXqSMMlp9WLjl0kEBWdo7Xq7zA1OmesGniXfEAvi1rjCnLaQLJUIcwCRywLRcS28NPu/AJSv5wLhOOBari/zV5RGpL3xCJBswgZE9nozxtJuPFbtnRYLFQVSN8qk4+JEQrIa0lI9bRGgsjbe4GWdB4N0ZwUdxhywwFB4C0SKB/nwpFG6jt/IVvA9USsSuZwIDAQAB
+    issuer: http://example.org/auth
+    enabled: true

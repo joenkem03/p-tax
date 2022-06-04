@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+
+<!--    id int(11) AI PK-->
+<!--    firstName varchar(64)-->
+<!--    lastName varchar(64)-->
+<!--    otherNames varchar(64)-->
+<!--    email varchar(64)-->
+<!--    phone varchar(32)-->
+<!--    createdDate datetime-->
+<!--    lastUpdatedDate datetime-->
+<!--    role varchar(32)-->
+<!--    lastLoginDate datetime-->
+<!--    loginFailedDate datetime-->
+<!--    loginFailedCount int(11)-->
+<!--    isEmailConfirmed tinyint(1)-->
+<!--    isPhoneConfirmed tinyint(1)-->
+<!--    emailConfirmedDate datetime-->
+<!--    phoneConfirmedDate datetime-->
+<!--    emailConfirmationCode varchar(32)-->
+<!--    phoneConfirmationCode varchar(32)-->
+<!--    resetPasswordRequestDate datetime-->
+<!--    resetPasswordCode varchar(32)-->
+<!--    resetPasswordCount int(11)-->
+<!--    passwordHash varbinary(4000)-->
+<!--    passwordSalt varbinary(4000)-->
+<!--    isActive-->
+    <insert id="insert" parameterType="User">
+                <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+                    select last_insert_id();
+                </selectKey>
+        INSERT INTO users (firstName, lastName, otherNames, email, phone, createdDate, lastUpdatedDate, role, lastLoginDate, loginFailedDate, loginFailedCount,
+            isEmailConfirmed, isPhoneConfirmed, emailConfirmedDate, phoneConfirmedDate, emailConfirmationCode, phoneConfirmationCode, resetPasswordRequestDate,
+            resetPasswordCode, resetPasswordCount, passwordHash, passwordSalt, isActive, businessId, isDefaultPass)
+        VALUES (#{firstName}, #{lastName}, #{otherNames}, #{email}, #{phone}, #{createdDate}, #{lastUpdatedDate}, #{role}, #{lastLoginDate}, #{loginFailedDate}, #{loginFailedCount},
+        #{isEmailConfirmed}, #{isPhoneConfirmed}, #{emailConfirmedDate}, #{phoneConfirmedDate}, #{emailConfirmationCode}, #{phoneConfirmationCode}, #{resetPasswordRequestDate},
+        #{resetPasswordCode}, #{resetPasswordCount}, #{passwordHash}, #{passwordSalt}, #{isActive}, #{businessId}, #{isDefaultPass});
+    </insert>
+
+    <update id="update" parameterType="User">
+        UPDATE users SET firstName = #{firstName}, lastName = #{lastName}, otherNames = #{otherNames}, email = #{email}, phone = #{phone}, createdDate = #{createdDate},
+        lastUpdatedDate = #{lastUpdatedDate}, role = #{role}, lastLoginDate = #{lastLoginDate}, loginFailedDate = #{loginFailedDate}, loginFailedCount = #{loginFailedCount},
+        isEmailConfirmed = #{isEmailConfirmed}, isPhoneConfirmed = #{isPhoneConfirmed}, emailConfirmedDate = #{emailConfirmedDate}, phoneConfirmedDate = #{phoneConfirmedDate},
+        emailConfirmationCode = #{emailConfirmationCode}, phoneConfirmationCode = #{phoneConfirmationCode}, resetPasswordRequestDate = #{resetPasswordRequestDate},
+        resetPasswordCode = #{resetPasswordCode}, resetPasswordCount = #{resetPasswordCount}, passwordHash = #{passwordHash}, passwordSalt = #{passwordSalt}, isActive = #{isActive},
+        isDefaultPass = #{isDefaultPass}, businessId = #{businessId} WHERE id = #{id}
+    </update>
+
+    <select id="getUserById" resultType="user" resultOrdered="true">
+        SELECT * FROM users WHERE id=#{id};
+    </select>
+
+    <select id="getUserByIdDto" resultType="UserDto" resultOrdered="true">
+        SELECT * FROM users WHERE id=#{id};
+    </select>
+
+    <select id="getUserByEmail" resultType="user" resultOrdered="true">
+        SELECT * FROM users WHERE email=#{email};
+    </select>
+
+    <select id="getUserByPhone" resultType="user" resultOrdered="true">
+        SELECT * FROM users WHERE phone=#{phone};
+    </select>
+
+    <select id="getUserByPhoneOrEmail" resultType="user" resultOrdered="true">
+        SELECT * FROM users WHERE phone=#{phone} OR email=#{email};
+    </select>
+
+    <select id="getUserByPhoneOrEmailDto" resultType="userDto" parameterType="userDto" resultOrdered="true">
+        SELECT * FROM users WHERE phone=#{phone} OR email=#{email};
+    </select>
+
+    <select id="searchUserByPhoneOrEmailOrName" resultType="userDto" parameterType="userDto" resultOrdered="true">
+        SELECT * FROM users WHERE phone like #{phone} OR email like #{email} OR firstName like #{firstName} OR lastName
+        like #{lastName} OR otherNames like #{otherNames};
+    </select>
+
+    <select id="getUserByPhoneCode" resultType="user" resultOrdered="true">
+        SELECT * FROM users WHERE phone=#{phone} AND phoneConfirmationCode=#{email};
+    </select>
+
+    <select id="selectAllUser" resultType="UserDto">
+        SELECT * FROM users;
+    </select>
+
+    <select id="getCountUser" resultType="int">
+        SELECT COUNT(Id) FROM users;
+    </select>
+
+    <select id="selectAllUserWhere" resultType="UserDto">
+        SELECT * FROM users WHERE role IN (#{roleType}) ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+
+
+    <select id="searchAllUserMultiWhere" parameterType="User" resultType="UserDto">
+        SELECT * FROM extended_users_view WHERE firstName LIKE #{firstName} OR lastName LIKE #{lastName} OR otherNames LIKE #{otherNames}
+        OR email LIKE #{email} OR phone LIKE #{phone} AND role IN
+        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">
+            #{role}
+        </foreach>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY #{firstName} ASC;
+    </select>
+
+
+
+    <select id="searchAllUserMultiWhereRx" parameterType="UserSearchDto" resultType="UserDto">
+        SELECT * FROM extended_users_view WHERE (firstName LIKE #{firstName} OR lastName LIKE #{lastName} OR otherNames LIKE #{otherNames}
+        OR email LIKE #{email} OR phone LIKE #{phone}) AND role = #{role}
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY #{firstName} ASC;
+    </select>
+
+
+    <select id="selectAllUserMultiWhere" parameterType="org.bizzdeskgroup.Dtos.Query.UserPageFinder" resultType="UserDto">
+        SELECT * FROM extended_users_view WHERE role IN
+        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">
+            #{role}
+        </foreach>
+
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+    <select id="getCountUserWhere" parameterType="org.bizzdeskgroup.Dtos.Query.UserPageFinder" resultType="int">
+        SELECT COUNT(Id) FROM users WHERE role IN
+        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">
+            #{role}
+        </foreach>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        AND isActive = #{status};
+    </select>
+
+    <select id="searchUser" resultType="User">
+        SELECT * FROM users WHERE email like #{email} OR phone like #{phone} OR firstName like #{firstName} OR lastName like #{lastName};
+    </select>
+<!--    <if test="orderBy == null">-->
+<!--        , id-->
+<!--    </if>-->
+
+
+
+    <select id="getTaxPayerById" resultType="TaxPayerDto">
+        SELECT * FROM tax_payers_view WHERE payerId = #{payerId};
+    </select>
+</mapper>

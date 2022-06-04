@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>gotax-service-app</artifactId>
+        <groupId>org.bizzdeskgroup</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>gotax-service-business-logic</artifactId>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.bizzdeskgroup</groupId>
+            <artifactId>gotax-service-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+            <version>${orika-core.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.bizzdeskgroup</groupId>-->
+<!--            <artifactId>PepipostLib</artifactId>-->
+<!--            <version>1.0-SNAPSHOT</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.infobip</groupId>
+            <artifactId>infobip-api-java-client</artifactId>
+            <version>${infobip-api-java-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda-time.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${org-apache-poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${org-apache-poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox}</version>
+            <scope>compile</scope>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.pdfbox</groupId>-->
+<!--            <artifactId>pdfbox</artifactId>-->
+<!--            <version>2.0.25</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
+    </dependencies>
+
+<!--    <properties>-->
+<!--        <maven.compiler.source>11</maven.compiler.source>-->
+<!--        <maven.compiler.target>11</maven.compiler.target>-->
+<!--    </properties>-->
+
+</project>

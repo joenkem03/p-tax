@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Invoice">
+    <insert id="insert" parameterType="Invoice">
+<!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+<!--            select last_insert_id();-->
+<!--        </selectKey>-->
+        INSERT INTO invoices
+        (invoiceNo,
+        invoiceAmount,
+        assessmentId,
+        serviceId,
+        isPaid,
+        createdBy,
+        createdDate,
+        mdaId,
+        businessId,
+        month,
+        year,
+        userId,
+        mdaOfficeId)
+        VALUES
+        (#{invoiceNo},
+        #{invoiceAmount},
+        #{assessmentId},
+        #{serviceId},
+        #{isPaid},
+        #{createdBy},
+        #{createdDate},
+        #{mdaId},
+        #{businessId},
+        #{month},
+        #{year},
+        #{userId},
+        #{mdaOfficeId});
+    </insert>
+    <select id="invoicesByRef" resultType="Invoice">
+        SELECT * FROM remittances WHERE invoiceNo = #{transactionReference} AND isPaid = 0 AND isActive = 1;
+    </select>
+    <select id="invoicesByRefId" resultType="Invoice">
+        SELECT * FROM invoices WHERE id = #{id} AND isPaid = 0 AND isActive = 1;
+    </select>
+    <select id="invoicesByNo" resultType="Invoice">
+        SELECT * FROM invoices WHERE id = #{id} AND isPaid = 0 AND isActive = 1;
+    </select>
+    <select id="invoicesByNoX" resultType="Invoice">
+        SELECT * FROM invoices WHERE invoiceNo = #{id} AND isPaid = 0 AND isActive = 1;
+    </select>
+    <select id="invoicesByAssess" resultType="Invoice">
+        SELECT * FROM invoices WHERE id = #{id} AND isPaid = 0 AND isActive = 1;
+    </select>
+    <select id="invoicesByAssessUpdate" resultType="double">
+        SELECT SUM(invoiceAmount) FROM invoices WHERE assessmentId = #{id} AND isPaid = 1 AND isActive = 1;
+    </select>
+    <update id="update" parameterType="Invoice">
+        UPDATE invoices
+        SET
+        updatedBy = #{updatedBy},
+        isPaid = #{isPaid},
+        updatedDate = #{updatedDate},
+        paymentChannel = #{paymentChannel}
+        WHERE id = #{id};
+    </update>
+<!--    <select id="invoicesByRef" resultType="Invoice">-->
+<!--        SELECT * FROM remittances WHERE invoiceNo = #{transactionReference} AND isPaid = 0 AND isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="searchMulti" resultType="InvoiceDto" parameterType="InvoiceIntDto">-->
+<!--    SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, invoiceNo,invoices.invoiceAmount,-->
+<!--    invoices.assessmentId, invoices.isPaid, invoices.createdBy, invoices.createdDate, invoices.month, invoices.year, invoices.userId,-->
+<!--    mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, invoices.createdBy AS generatedBy FROM invoices-->
+<!--    LEFT JOIN users ON invoices.userId = users.id LEFT JOIN mda_services ON invoices.serviceId = mda_services.id  WHERE users.firstName-->
+<!--    like  #{payerFirstName} OR users.lastName like #{payerLastName} OR mda_services.name like #{assesedService} OR mda_services.code-->
+<!--    like #{assesedServiceCode} OR invoices.invoiceNumber like #{invoiceNumber}-->
+<!--    </select>-->
+
+
+    <select id="searchMultiX" resultType="InvoiceDto" parameterType="InvoiceIntDto">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, invoices.invoiceNo, invoices.invoiceAmount, invoices.mdaId, mda_services.id AS serviceId,
+        invoices.assessmentId, invoices.isPaid, invoices.createdBy, invoices.createdDate, invoices.month, invoices.year, invoices.userId AS customerId, users.phone AS PayerPhone,
+        users.email AS PayerEmail, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, invoices.createdBy AS generatedBy FROM invoices
+        LEFT JOIN users ON invoices.userId = users.id LEFT JOIN mda_services ON invoices.serviceId = mda_services.id  WHERE users.firstName
+        like  #{payerFirstName} OR users.lastName like #{payerLastName} OR mda_services.name like #{assesedService} OR mda_services.code
+        like #{assesedServiceCode} OR invoices.invoiceNo like #{invoiceNo} OR users.phone like #{mda}
+
+        <if test="userId > 0">
+            AND invoices.userId = #{userId}
+        </if>
+        <if test="mdaId > 0">
+            AND invoices.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND invoices.businessId = #{businessId}
+        </if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+
+    <select id="searchMultiPending" resultType="InvoiceTinDto" parameterType="InvoiceIntDto">
+        SELECT * FROM assessment_invoice_view WHERE (invoiceNo = #{invoiceNo} OR payerPhone = #{invoiceNo} OR assessmentId = #{invoiceNo}) AND isPaid = 0
+        <if test="userId > 0">
+            AND customerId = #{userId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+
+
+
+    <select id="searchMulti" resultType="InvoiceTinDto" parameterType="InvoiceIntDto">
+        SELECT * FROM assessment_invoice_view WHERE payerFirstName
+        like #{payerFirstName} OR payerLastName like #{payerLastName} OR assesedService like #{assesedService} OR assesedServiceCode
+        like #{assesedServiceCode} OR invoiceNo like #{invoiceNo} OR payerPhone like #{mda}
+
+        <if test="userId > 0">
+            AND customerId = #{userId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+
+
+    <select id="selectAllMulti" resultType="InvoiceTinDto" parameterType="PageFinder">
+        SELECT * FROM assessment_invoice_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+
+        <if test="payerId > 0">
+            AND customerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <!--        <if test="orderBy == null">-->
+        <!--            , id-->
+        <!--        </if>-->
+        ORDER BY #{orderBy} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="searchMultiPendingX" resultType="InvoiceDto" parameterType="InvoiceIntDto">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, users.role AS PayerType, invoices.invoiceNo, invoices.invoiceAmount, invoices.mdaId, mda_services.id AS serviceId,
+        invoices.assessmentId, invoices.isPaid, invoices.createdBy, invoices.createdDate, invoices.month, invoices.year, invoices.userId AS customerId, users.phone AS PayerPhone,
+        users.email AS PayerEmail, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, invoices.createdBy AS generatedBy, individuals.temporaryTin AS itemporaryTin,
+        individuals.jtbTin AS ijtbTin, non_individuals.temporaryTin AS ntemporaryTin, non_individuals.jtbTin AS njtbTin FROM invoices LEFT JOIN individuals ON invoices.userId = individuals.userId
+        LEFT JOIN non_individuals ON invoices.userId = non_individuals.payerId LEFT JOIN users ON invoices.userId = users.id LEFT JOIN mda_services ON invoices.serviceId = mda_services.id  WHERE users.firstName
+        like  #{payerFirstName} OR users.lastName like #{payerLastName} OR mda_services.name like #{assesedService} OR mda_services.code
+        like #{assesedServiceCode} OR invoices.invoiceNo like #{invoiceNo} OR users.phone like #{mda} AND invoices.isPaid = 0
+
+        <if test="userId > 0">
+            AND invoices.userId = #{userId}
+        </if>
+        <if test="mdaId > 0">
+            AND invoices.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND invoices.businessId = #{businessId}
+        </if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+
+    <select id="selectAllMultiX" resultType="InvoiceDto" parameterType="PageFinder">
+        SELECT users.firstName AS payerFirstName, users.lastName AS payerLastName, invoiceNo,invoices.invoiceAmount, invoices.assessmentId, invoices.isPaid, invoices.createdBy,
+        invoices.createdDate, invoices.month, invoices.year, invoices.userId , mda_services.name AS assesedService, mda_services.code AS assesedServiceCode FROM invoices
+        LEFT JOIN users ON invoices.userId = users.id LEFT JOIN mda_services ON invoices.serviceId = mda_services.id WHERE DATE(invoices.createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+
+        <if test="payerId > 0">
+            AND invoices.userId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND invoices.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND invoices.businessId = #{businessId}
+        </if>
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+        ORDER BY #{orderBy} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="getCountMulti" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(Id) FROM invoices
+
+        <if test="payerId > 0">
+            WHERE invoices.userId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            WHERE invoices.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            WHERE invoices.businessId = #{businessId}
+        </if>;
+    </select>
+
+<!--    <select id="PaidInvoice" parameterType="PageFinder" resultType="AdminTransactionDto">-->
+<!--        SELECT-->
+<!--        invoiceNo AS transactionReference,-->
+<!--        invoiceAmount AS totalAmountPaid,-->
+<!--        updatedDate as transactionDate,-->
+<!--        paymentChannel AS channel,-->
+<!--        mdaId,-->
+<!--        businessId,-->
+<!--        FROM invoices WHERE isPaid = 1 AND userId = #{payerId}-->
+<!--        ORDER BY updatedDate DESC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+    <select id="SearchPaidInvoice" parameterType="PageFinder" resultType="TransactionDto">
+        SELECT
+        invoiceNo AS transactionReference,
+        invoiceAmount AS totalAmountPaid,
+        updatedDate as transactionDate,
+        paymentChannel AS channel,
+        serviceDesc AS transactionDescription,
+        terminalId,
+        pan,
+        mdaName,
+        project,
+        mdaId
+        FROM invoices_extended WHERE isPaid = 1 AND userId = #{payerId} AND (invoiceNo LIKE #{invoiceNo})
+        ORDER BY updatedDate DESC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+    <select id="PaidInvoice" parameterType="PageFinder" resultType="TransactionDto">
+        SELECT
+        transactionId,
+        cashTransactionId,
+        invoiceNo AS transactionReference,
+        invoiceAmount AS totalAmountPaid,
+        updatedDate as transactionDate,
+        paymentChannel AS channel,
+        serviceDesc AS transactionDescription,
+        terminalId,
+        pan,
+        mdaName,
+        project,
+        mdaId
+        FROM invoices_extended WHERE isPaid = 1 AND userId = #{payerId}
+        ORDER BY updatedDate DESC LIMIT #{from}, #{recordsPerPage};
+    </select>
+    <select id="PaidInvoiceCount" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM invoices_extended WHERE isPaid = 1 AND userId = #{payerId};
+    </select>
+
+    <select id="PayerPaidInvoiceSummary" resultType="TransactionMonthlySummaryDto" parameterType="PageFinder">
+        SELECT COUNT(id) AS count, SUM(invoiceAmount) AS totalRev FROM invoices_extended WHERE isPaid = 1 AND userId = #{payerId} AND
+        MONTH(updatedDate) = MONTH(#{startTransactionDate}) AND MONTH(updatedDate) = YEAR(#{startTransactionDate});
+    </select>
+
+    <select id="PaidAssessmentInvoice" resultType="double" parameterType="int">
+        SELECT invoiceAmount FROM paid_assessment_invoice_view WHERE assessmentId = #{assessmentId};
+    </select>
+    <select id="singleAssessPaidSum" resultType="double" parameterType="int">
+        SELECT SUM(invoiceAmount) FROM invoices WHERE assessmentId = #{id} AND isPaid = 1;
+    </select>
+
+    <select id="invoiceByAssessment" resultType="InvoiceTinDto" parameterType="PageFinder">
+        SELECT * FROM assessment_invoice_view WHERE assessmentId = #{id}
+        <if test="payerId > 0">
+            AND customerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>;
+    </select>
+</mapper>
+
+<!--        public String transactionId;-->
+<!--        public String transactionReference;-->
+<!--        public Timestamp transactionDate;-->
+<!--        public String transactionDescription;-->
+<!--        public double totalAmountPaid;-->
+<!--        //    public String transactionType;-->
+<!--        public String channel;-->
+<!--        public String customerName;-->
+<!--        public String customerPhone;-->
+<!--        public String customerEmail;-->
+<!--        public int mdaId;-->

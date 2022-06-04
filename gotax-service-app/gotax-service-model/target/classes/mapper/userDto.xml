@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UserDto">
+    <select id="selectAllUserWhere" parameterType="org.bizzdeskgroup.Dtos.Query.UserPageFinder" resultType="UserDto">
+        SELECT * FROM users WHERE role IN
+        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">
+            #{role}
+        </foreach>
+         ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+</mapper>

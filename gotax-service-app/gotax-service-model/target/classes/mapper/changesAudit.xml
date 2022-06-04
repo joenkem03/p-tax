@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ChangeAudit">
+    <insert id="insertChange" parameterType="ChangeReq">
+        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        INSERT INTO change_request
+        (createdBy,
+        affectedUser,
+        changeItem,
+        changeItemDesc,
+        oldValue,
+        newValue,
+        createdDate,
+        businessId)
+        VALUES
+        (#{createdBy},
+        #{affectedUser},
+        #{changeItem},
+        #{changeItemDesc},
+        #{oldValue},
+        #{newValue},
+        #{createdDate},
+        #{businessId});
+    </insert>
+
+    <update id="updateChangeReq" parameterType="UpdateChangeReqDto">
+        UPDATE change_request
+        SET
+        isPending = #{isPending},
+        isApproved = #{isApproved},
+        updatedBy = #{updatedBy},
+        updatedDate = {updatedDate}
+        WHERE id = #{id};
+
+    </update>
+
+    <select id="getChanges" resultType="ChangeReqDto" parameterType="PageFinder">
+        SELECT * FROM ext_change_req_view
+        WHERE isPending = 1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY #{orderBy} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+    <select id="getChangesById" resultType="ChangeReqDto">
+        SELECT id,
+        createdBy,
+        affectedUser,
+        changeItem,
+        oldValue,
+        newValue,
+        isPending,
+        isApproved,
+        updatedBy,
+        createdDate,
+        updatedDate
+        FROM change_request
+        WHERE isPending = 1;
+    </select>
+
+    <select id="getChangesCount" resultType="int">
+        SELECT COUNT(id)
+        FROM ext_change_req_view
+        WHERE isPending = 1a
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>;
+    </select>
+
+    <insert id="NewActivity" parameterType="ActivityLog">
+        INSERT INTO activity_log
+        (id,
+        action,
+        actionDesc,
+        affectedUser,
+        createdBy,
+        createdDate,
+        businessId,
+        timeStamp)
+        VALUES
+        (#{id},
+        #{action},
+        #{actionDesc},
+        #{affectedUser},
+        #{createdBy},
+        #{createdDate},
+        #{businessId},
+        #{timeStamp});
+    </insert>
+
+
+
+    <select id="getActivities" resultType="ActivityLogDto" parameterType="PageFinder">
+        SELECT * FROM ext_log_view WHERE 1=1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY #{orderBy} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+    <select id="getActivitiesCount" resultType="int">
+        SELECT COUNT(id)
+        FROM ext_log_view
+        WHERE 1 = 1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>;
+    </select>
+</mapper>

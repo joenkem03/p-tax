@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MdaService">
+
+    <insert id="insert" parameterType="MdaService">
+        <!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+        <!--            select last_insert_id();-->
+        <!--        </selectKey>-->
+        INSERT INTO mda_services
+        (name, code, mdaId, isAssessable, isFixedAmount, amount, isRetaining, isRetainingByPercentage, retainingValue, createdBy, createdDate, isActive, businessId)
+        VALUES
+        (#{name}, #{code}, #{mdaId}, #{isAssessable}, #{isFixedAmount}, #{amount}, #{isRetaining}, #{isRetainingByPercentage}, #{retainingValue}, #{createdBy}, #{createdDate},  #{isActive}, #{businessId});
+    </insert>
+
+    <update id="update" parameterType="MdaService">
+        UPDATE mda_services SET name = #{name}, code = #{code}, mdaId = #{mdaId}, isAssessable = #{isAssessable}, isFixedAmount = #{isFixedAmount},
+        amount = #{amount}, isRetaining = #{isRetaining}, isRetainingByPercentage = #{isRetainingByPercentage}, retainingValue = #{retainingValue}, updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate}, isActive = #{isActive} WHERE id = #{id};
+    </update>
+
+    <select id="getMdaServiceByIdMdaId" resultType="MdaService" resultOrdered="true">
+        SELECT * FROM mda_services WHERE mdaId=#{id} AND isActive = 1;
+    </select>
+
+    <select id="getMdaServiceById" resultType="MdaService" resultOrdered="true">
+        SELECT * FROM mda_services WHERE id=#{id} AND isActive = 1;
+    </select>
+
+    <select id="getMdaServiceByNameOrCode" resultType="MdaService" resultOrdered="true" parameterType="MdaService">
+        SELECT * FROM mda_services WHERE (name = #{name} OR code = #{code}) AND businessId = #{businessId} AND isActive = 1;
+    </select>
+
+    <select id="searchMdaService" resultType="MdaService">
+        SELECT * FROM mda_services WHERE name like #{name} OR code like #{code} AND isActive = 1
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getCountAllMdaServices" resultType="int">
+        SELECT SUM(mdaServices) FROM mda_services_count_view;
+    </select>
+
+    <select id="getCountAllMdaServicesMega" resultType="int" parameterType="PageFinder">
+        SELECT SUM(mdaServices) FROM mda_services_count_view WHERE 1=1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>;
+    </select>
+
+    <select id="getCountMdaServices" resultType="int">
+        SELECT mdaServices FROM mda_services_count_view WHERE mdaId = #{id};
+    </select>
+
+    <select id="getCountMdaServicesDyn" resultType="int" parameterType="PageFinder" >
+        SELECT COUNT(id) FROM mda_services WHERE isActive = 1
+        <if test="businessId > 0">AND businessId = #{businessId} </if>
+        <if test="mdaId > 0">AND mdaId = #{mdaId} </if>
+        <if test="status == 0">AND amount > 0</if>;
+    </select>
+
+
+    <!--    <select id="getCountAllMdaServices" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM mda_services WHERE isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="getCountMdaServices" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM mda_services WHERE mdaId = #{id} AND isActive = 1;-->
+<!--    </select>-->
+
+    <select id="getAllPagedx" resultType="MdaServiceDto" parameterType="MdaOffice">
+        SELECT * FROM mda_services WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdaServicesWhereLikex" resultType="MdaServiceDto">
+        SELECT * FROM mda_services WHERE name like #{name} OR code like #{code} AND isActive = 1 order by #{name}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getAllPaged" resultType="MdaServiceDto" parameterType="PageFinder">
+        SELECT * FROM mda_services WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getAllPagedDyn" resultType="MdaServiceDto" parameterType="PageFinder">
+        SELECT * FROM mda_services WHERE isActive = 1
+        <if test="businessId > 0">AND businessId = #{businessId} </if>
+        <if test="mdaId > 0">AND mdaId = #{mdaId} </if>
+        <if test="status == 0">AND amount > 0</if>
+        ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdaServicesDynWhereLike" resultType="MdaServiceDto" parameterType="MdaService">
+        SELECT * FROM mda_services WHERE (name like #{name} OR code like #{code}) AND isActive = 1
+        <if test="businessId > 0">AND businessId = #{businessId} </if>
+        <if test="mdaId > 0">AND mdaId = #{mdaId} </if>
+        <if test="isFixedAmount == 0">AND amount > 0</if>
+        order by #{name}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdaServicesWhereLike" resultType="MdaServiceDto" parameterType="MdaService">
+        SELECT * FROM mda_services WHERE (name like #{name} OR code like #{code}) AND isActive = 1
+        <if test="mdaId > 0">AND mdaId = #{mdaId} </if>
+        <if test="mdaId == 0">AND amount > 0</if>
+        order by #{name}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+<!--    <select id="getMdaServicesWhereLike" resultType="MdaServiceDto" parameterType="MdaService">-->
+<!--        SELECT * FROM mda_services WHERE name like #{name} OR code like #{code} AND isActive = 1 order by #{name}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC;-->
+<!--    </select>-->
+</mapper>

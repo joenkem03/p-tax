@@ -1,0 +1,14 @@
+{
+  "resourcePackages" : [ "org.bizzdeskgroup.api.v1" ],
+  "swagger" : {
+    "info" : {
+      "version" : "v1.0.0",
+      "title" : "PaySure-Tax API"
+    },
+    "host" : "",
+    "basePath" : "paysure-service/v1",
+    "schemes" : [ "http" ]
+  },
+  "applicationClass" : "org.bizzdeskgroup.api.v1.PaySureTaxApp",
+  "swaggerDefinitionClass" : "org.bizzdeskgroup.api.v1.PaySureTaxApp"
+}

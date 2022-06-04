@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Assessment">
+    <insert id="insert" parameterType="Assessment">
+        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        INSERT INTO assessments
+        (payerId, assessedServiceId, invoiceNumber, payerTin, referenceNumber, taxYear, taxMonth, grossIncomeAmount,
+        taxAmount, businessId, assessmentOfficerRecommendation, recommendationDate, recommendedAmount, createdBy, createdDate, mdaId, mdaOfficeId)
+        VALUES
+        (#{payerId}, #{assessedServiceId}, #{invoiceNumber}, #{payerTin}, #{referenceNumber}, #{taxYear}, #{taxMonth}, #{grossIncomeAmount},
+        #{taxAmount}, #{businessId}, #{assessmentOfficerRecommendation}, #{recommendationDate}, #{recommendedAmount}, #{createdBy}, #{createdDate}, #{mdaId}, #{mdaOfficeId});
+    </insert>
+    
+    <update id="update" parameterType="Assessment">
+        UPDATE assessments
+        SET
+        payerId = #{payerId},
+        assessedServiceId = #{assessedServiceId},
+        balance = #{balance},
+        invoiceNumber = #{invoiceNumber},
+        payerTin = #{payerTin},
+        referenceNumber = #{referenceNumber},
+        isSettled = #{isSettled},
+        taxYear = #{taxYear},
+        taxMonth = #{taxMonth},
+        taxAmount = #{taxAmount},
+        isObjected = #{isObjected},
+        assessmentOfficerRecommendation = #{assessmentOfficerRecommendation},
+        recommendationDate = #{recommendationDate},
+        recommendedAmount = #{recommendedAmount},
+        updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate},
+        recommendationBy = #{recommendationBy},
+
+        grossIncomeAmount = #{grossIncomeAmount},
+        objectionRequest = #{objectionRequest},
+        objectionAuthorizedBy = #{objectionAuthorizedBy},
+        objectionReason = #{objectionReason},
+        AmountPaid = #{AmountPaid},
+        balance = #{balance}
+
+        WHERE id = #{id};
+    </update>
+    <select id="singleAssessPaidSum" resultType="double" parameterType="int">
+        SELECT SUM(invoiceAmount) FROM assessment_invoice_view WHERE assessmentId = #{id} AND isPaid = 1;
+    </select>
+    <select id="singleAssess" resultType="Assessment" parameterType="int">
+        SELECT * FROM assessments WHERE id = #{id}
+    </select>
+
+    <select id="singleAssessAlt" resultType="AssessmentDto" parameterType="PageFinder">
+        SELECT * FROM assessment_dto_view WHERE id = #{id}
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>
+        <if test="payerId > 0">
+            AND payerId = #{payerId}
+        </if>
+    </select>
+
+<!--    <select id="single" resultType="AssessmentDto">-->
+<!--        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,-->
+<!--        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, -->
+<!--        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,-->
+<!--        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,-->
+<!--        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy-->
+<!--        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id ORDER BY #{orderBy} WHERE assessments.id = #{id}-->
+<!--    </select>-->
+    <select id="single" resultType="AssessmentDto">
+        SELECT assessments.id AS id, users.firstName AS payerFirstName, users.lastName AS payerLastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, assessments.taxAmount,
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id WHERE assessments.id = #{id}
+    </select>
+    <select id="selectAll" resultType="AssessmentDto" parameterType="PageFinder">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, 
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+        LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="selectAllMda" resultType="AssessmentDto" parameterType="PageFinder">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, 
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id WHERE assessments.mdaId = #{mdaId} ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="search" resultType="AssessmentDto" parameterType="AssessmentDto">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, 
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id WHERE users.firstName like  #{PayerfirstName} OR users.lastName like #{PayerlastName} OR assessments.invoiceNumber like #{invoiceNumber} OR
+        assessments.payerTin like #{payerTin} OR mda_services.name like #{assesedService} OR mda_services.code like #{assesedServiceCode}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+    <select id="searchProject" resultType="AssessmentDto" parameterType="AssessmentDto">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, 
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id WHERE users.firstName like  #{PayerfirstName} OR users.lastName like #{PayerlastName} OR assessments.invoiceNumber like #{invoiceNumber} OR
+        assessments.payerTin like #{payerTin} OR mda_services.name like #{assesedService} OR mda_services.code like #{assesedServiceCode} AND assessments.businessId = #{projectId}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+    <select id="searchMda" resultType="AssessmentDto" parameterType="AssessmentDto">
+        SELECT users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, 
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id WHERE users.firstName like  #{PayerfirstName} OR users.lastName like #{PayerlastName} OR assessments.invoiceNumber like #{invoiceNumber} OR
+        assessments.payerTin like #{payerTin} OR mda_services.name like #{assesedService} OR mda_services.code like #{assesedServiceCode} AND assessments.mdaId = #{mdaId}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+    <select id="searchPayer" resultType="AssessmentDto" parameterType="Assessment">
+        SELECT assessments.id AS id, users.firstName AS PayerfirstName, users.lastName AS PayerlastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, 
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id WHERE users.firstName like  #{PayerfirstName} OR users.lastName like #{PayerlastName} OR assessments.invoiceNumber like #{invoiceNumber} OR
+        assessments.payerTin like #{payerTin} OR mda_services.name like #{assesedService} OR mda_services.code like #{assesedServiceCode} AND assessments.payerId = #{payerId}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+
+
+    <select id="searchMulti" resultType="AssessmentDto" parameterType="AssessmentInDto">
+        SELECT * FROM assessment_dto_view WHERE (payerFirstName like  #{payerFirstName} OR payerLastName like #{payerLastName} OR
+        itemporaryTin like #{payerTin} OR ntemporaryTin like #{payerTin} OR ijtbTin like #{payerTin} OR njtbTin like #{payerTin} OR
+        assesedService like #{assesedService} OR assesedServiceCode like #{assesedServiceCode} OR phone like #{phone})
+
+        <if test="projectId > 0">
+            AND businessId = #{projectId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+        </if>
+        <if test="assesor > 0">
+            AND assessedBy = #{assesor}
+        </if>
+        <if test="payerId > 0">
+            AND payerId = #{payerId}
+        </if>
+
+        <if test="isObjected ==  1"> AND isObjected = #{isObjected}</if>
+
+        <if test="isSettled ==  0"> AND isSettled = #{isSettled}</if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+<!--    <select id="searchMulti" resultType="AssessmentDto" parameterType="AssessmentInDto">-->
+<!--        SELECT * FROM assessment_dto_view WHERE (payerFirstName like  #{payerFirstName} OR payerLastName like #{payerLastName} OR-->
+<!--        itemporaryTin like #{payerTin} OR ntemporaryTin like #{payerTin} OR ijtbTin like #{payerTin} OR njtbTin like #{payerTin} OR-->
+<!--        assesedService like #{assesedService} OR assesedServiceCode like #{assesedServiceCode} OR phone like #{phone})-->
+
+<!--        <if test="projectId > 0">-->
+<!--            AND businessId = #{projectId}-->
+<!--        </if>-->
+<!--        <if test="mdaId > 0">-->
+<!--            AND mdaId = #{mdaId}-->
+<!--        </if>-->
+<!--        <if test="officeId > 0">-->
+<!--            AND mdaOfficeId = #{officeId}-->
+<!--        </if>-->
+<!--        <if test="assesor > 0">-->
+<!--            AND assessedBy = #{assesor}-->
+<!--        </if>-->
+<!--        <if test="payerId > 0">-->
+<!--            AND payerId = #{payerId}-->
+<!--        </if>-->
+
+<!--        <if test="isObjected ==  1"> AND isObjected = #{isObjected}</if>-->
+
+<!--        <if test="isSettled ==  0"> AND isSettled = #{isSettled}</if>-->
+<!--        <if test="recordsPerPage > 0">-->
+<!--            LIMIT #{from}, #{recordsPerPage}-->
+<!--        </if>;-->
+<!--    </select>-->
+
+
+    <select id="searchMultiX" resultType="AssessmentDto" parameterType="AssessmentInDto">
+        SELECT assessments.id AS id, users.firstName AS payerFirstName, users.lastName AS payerLastName, assessments.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, assessments.taxAmount,
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy, mdas.name AS mdaName, mda_offices.name AS mdaOffice
+        FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id LEFT JOIN mdas ON mda_services.mdaId = mdas.Id LEFT JOIN mda_offices ON mda_services.mdaId = mda_offices.mdaId WHERE (users.firstName like  #{payerFirstName} OR users.lastName like #{payerLastName} OR
+        assessments.payerTin like #{payerTin} OR mda_services.name like #{assesedService} OR mda_services.code like #{assesedServiceCode}OR users.phone like #{phone})
+
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="projectId > 0">
+            AND assessments.businessId = #{projectId}
+        </if>
+        AND assessments.isObjected = #{isObjected}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="selectAllMulti" resultType="AssessmentDto" parameterType="PageFinder">
+        SELECT * FROM assessment_dto_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="payerId > 0">
+            AND payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+        </if>
+        <if test="agentId > 0">
+            AND assessedBy = #{agentId}
+        </if>
+        <if test="status ==  1"> AND isObjected = #{status}</if>
+        <!--        <if test="orderBy == null">-->
+        <!--            , id-->
+        <!--        </if>-->
+        ORDER BY #{orderBy} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="selectAllMultiX" resultType="AssessmentDto" parameterType="PageFinder">
+        SELECT assessments.id AS id, users.id AS payerId, users.firstName AS payerFirstName, users.lastName AS payerLastName, paid_assessment_invoice_view.balance AS balance, assessments.invoiceNumber AS invoiceNumber,
+        assessments.payerTin AS payerTin, assessments.referenceNumber AS referenceNumber, assessments.isSettled AS isSettled, assessments.taxAmount,
+        assessments.taxYear AS taxYear, assessments.taxMonth AS taxMonth, assessments.grossIncomeAmount AS grossIncomeAmount, assessments.isObjected AS isObjected,
+        assessments.assessmentOfficerRecommendation AS assessmentOfficerRecommendation, assessments.recommendationDate AS recommendationDate, assessments.objectionReason, assessments.objectionAuthorizedBy,
+        assessments.recommendedAmount AS recommendedAmount, mda_services.name AS assesedService, mda_services.code AS assesedServiceCode, assessments.createdBy AS assessedBy, mdas.name AS mdaName, mda_offices.name AS mdaOffice, assessments.createdDate
+        LEFT JOIN paid_assessment_invoice_view ON paid_assessment_invoice_view.assessmentId = assessments.id FROM assessments LEFT JOIN users ON assessments.payerId = users.id LEFT JOIN mda_services ON AssessedServiceId = mda_services.id LEFT JOIN mdas ON mda_services.mdaId = mdas.Id LEFT JOIN mda_offices ON mda_services.mdaId = mda_offices.mdaId
+        WHERE DATE(assessments.createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="agentId > 0">
+            AND assessments.createdBy = #{agentId}
+        </if>
+        <if test="status ==  1"> AND assessments.isObjected = #{status}</if>
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+        ORDER BY #{orderBy} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getCount" resultType="int">
+        SELECT COUNT(Id) FROM assessments;
+    </select>
+
+
+
+    <select id="getCountMultiZ" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(Id) FROM assessments WHERE DATE(assessments.createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="agentId > 0">
+            AND assessments.createdBy = #{agentId}
+        </if>
+        <if test="status ==  1"> AND assessments.isObjected = #{status}</if>;
+    </select>
+
+    <select id="getSumMultiZ" resultType="double" parameterType="PageFinder">
+        SELECT SUM(taxAmount) FROM assessments WHERE DATE(assessments.createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="agentId > 0">
+            AND assessments.createdBy = #{agentId}
+        </if>
+        <if test="status ==  1"> AND assessments.isObjected = #{status}</if>;
+    </select>
+
+    <select id="getCountMulti" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(Id) FROM assessments WHERE isObjected = #{status}
+
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+
+    <select id="getSumMulti" resultType="double" parameterType="PageFinder">
+        SELECT SUM(taxAmount) FROM assessments WHERE isObjected = #{status}
+
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+
+    <select id="getCountMda" resultType="int">
+        SELECT COUNT(Id) FROM assessments WHERE mdaId = #{mdaId};
+    </select>
+
+
+
+    <select id="getCountMultiDated" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(Id) FROM assessments WHERE isObjected = #{status} AND DATE(createdDate) BETWEEN DATE(#{startDate}) AND DATE(#{endDate})
+
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+
+    <select id="getSumMultiDated" resultType="double" parameterType="PageFinder">
+        SELECT SUM(taxAmount) FROM assessments WHERE isObjected = #{status} AND DATE(createdDate) BETWEEN DATE(#{startDate}) AND DATE(#{endDate})
+
+        <if test="businessId > 0">
+            AND assessments.businessId = #{businessId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>
+        <if test="mdaId > 0">
+            AND assessments.mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+
+
+    <select id="CountAssessmentMonthly" resultType="int" parameterType="PageFinder">
+<!--        SELECT COUNT(id) FROM assessments WHERE createdDate = YEAR(#{startTransactionDate}) AND transactionMonthNo = MONTH(#{startTransactionDate})-->
+        SELECT COUNT(id) FROM assessments WHERE 1=1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>;
+    </select>
+
+    <select id="SumAssessmentMonthly" resultType="double" parameterType="PageFinder">
+<!--        SELECT SUM(taxAmount) FROM assessments WHERE createdDate = YEAR(#{startTransactionDate}) AND transactionMonthNo = MONTH(#{startTransactionDate})-->
+        SELECT SUM(taxAmount) FROM assessments WHERE 1=1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>;
+    </select>
+
+
+
+    <select id="CountAssessmentObjMonthly" resultType="int" parameterType="PageFinder">
+        <!--        SELECT COUNT(id) FROM assessments WHERE createdDate = YEAR(#{startTransactionDate}) AND transactionMonthNo = MONTH(#{startTransactionDate})-->
+        SELECT COUNT(id) FROM assessments WHERE 1=1
+        <if test="filterBy == 'raised'">
+            AND objectionRequest = 1
+        </if>
+        <if test="filterBy == 'approved'">
+            AND isObjected = 1
+        </if>
+        <if test="filterBy == 'reject'">
+            AND isObjected = 0 AND objectionAuthorizedBy > 0
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>
+        <if test="payerId > 0">
+            AND assessments.payerId = #{payerId}
+        </if>;
+    </select>
+
+
+<!--    <select id="getCountMultiDated" resultType="int" parameterType="PageFinder">-->
+<!--        SELECT COUNT(Id) FROM assessments WHERE isObjected = #{status} AND DATE(createdDate) BETWEEN DATE(#{startDate}) AND DATE(#{endDate})-->
+
+<!--        <if test="businessId > 0">-->
+<!--            AND assessments.businessId = #{businessId}-->
+<!--        </if>-->
+<!--        <if test="payerId > 0">-->
+<!--            AND assessments.payerId = #{payerId}-->
+<!--        </if>-->
+<!--        <if test="mdaId > 0">-->
+<!--            AND assessments.mdaId = #{mdaId}-->
+<!--        </if>-->
+<!--        <if test="agentId > 0">-->
+<!--            AND createdBy = #{agentId}-->
+<!--        </if>;-->
+<!--    </select>-->
+
+<!--    <select id="getSumMultiDated" resultType="double" parameterType="PageFinder">-->
+<!--        SELECT SUM(taxAmount) FROM assessments WHERE isObjected = #{status} AND DATE(createdDate) BETWEEN DATE(#{startDate}) AND DATE(#{endDate})-->
+
+<!--        <if test="businessId > 0">-->
+<!--            AND assessments.businessId = #{businessId}-->
+<!--        </if>-->
+<!--        <if test="payerId > 0">-->
+<!--            AND assessments.payerId = #{payerId}-->
+<!--        </if>-->
+<!--        <if test="mdaId > 0">-->
+<!--            AND assessments.mdaId = #{mdaId}-->
+<!--        </if>-->
+<!--        <if test="agentId > 0">-->
+<!--            AND createdBy = #{agentId}-->
+<!--        </if>;-->
+<!--    </select>-->
+
+
+    <select id="AltMonthSumAll" resultType="TransactionMonthlySummaryDto" parameterType="Transaction" >
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate});
+    </select>
+
+
+
+    <select id="assessSummaryList" parameterType="PageFinder" resultType="AssessmentSummaryListDto">
+        SELECT COUNT(id) AS count, SUM(taxAmount) AS amountGenerated, SUM(AmountPaid) AS amountRemitted
+        <if test="status == true">
+            , MAX(businessName) AS business
+            , MAX(businessId) AS businessId
+        </if>
+        <if test="businessId > 0">
+            , MAX(mdaName) AS mda
+            , MAX(mdaId) AS mdaId
+        </if>
+        <if test="mdaId > 0">
+            , MAX(officeName) AS office
+            , MAX(mdaOfficeId) AS officeId
+        </if>
+        <if test="officeId > 0">
+            , MAX(firstName) AS officerFirstName
+            , MAX(lastName) AS officerLastName
+        </if>
+        FROM assessment_summary_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="status == true">
+            GROUP BY businessId
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+            GROUP BY mdaId
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+            GROUP BY mdaOfficeId
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+            GROUP BY createdBy
+        </if>
+    </select>
+
+
+    <select id="objectionSummaryList" parameterType="PageFinder" resultType="ObjSummaryListDto">
+        SELECT COUNT(id) AS count
+        <if test="status == true">
+            , MAX(businessName) AS business
+            , MAX(businessId) AS businessId
+        </if>
+        <if test="businessId > 0">
+            , MAX(mdaName) AS mda
+            , MAX(mdaId) AS mdaId
+        </if>
+        <if test="mdaId > 0">
+            , MAX(officeName) AS office
+            , MAX(mdaOfficeId) AS officeId
+        </if>
+        <if test="officeId > 0">
+            , MAX(firstName) AS officerFirstName
+            , MAX(lastName) AS officerLastName
+        </if>
+        FROM assessment_summary_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) AND objectionRequest = 1
+        <if test="status == true">
+            GROUP BY businessId
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+            GROUP BY mdaId
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+            GROUP BY mdaOfficeId
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+            GROUP BY createdBy
+        </if>
+    </select>
+
+
+    <select id="objectionSummaryListAlt" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(id) FROM assessment_summary_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) AND isObjected = 0 AND objectionAuthorizedBy > 0
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+        </if>
+    </select>
+</mapper>

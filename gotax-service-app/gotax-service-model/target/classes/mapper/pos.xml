@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Pos">
+
+    <insert id="insert" parameterType="Pos">
+        <!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+        <!--            select last_insert_id();-->
+        <!--        </selectKey>-->
+        INSERT INTO poses
+        (posMetaId,posImei,serialNo,isAssigned,activationCode,mdaId,mdaOfficeId,loggedInUser,lastLoggedInUser,isActive,createdBy,createdDate,updatedBy,posDeviceSerial)
+        VALUES
+        (#{posMetaId},#{posImei},#{serialNo},#{isAssigned},#{activationCode},#{mdaId},#{mdaOfficeId},#{loggedInUser},#{lastLoggedInUser},
+        #{isActive},#{createdBy},#{createdDate},#{updatedBy},#{posDeviceSerial});
+    </insert>
+
+    <update id="update" parameterType="Pos">
+        UPDATE poses SET
+        posMetaId = #{posMetaId},
+        posImei = #{posImei},
+        serialNo = #{serialNo},
+        isAssigned = #{isAssigned},
+        activationCode = #{activationCode},
+        mdaId = #{mdaId},
+        mdaOfficeId = #{mdaOfficeId},
+        loggedInUser = #{loggedInUser},
+        lastLoggedInUser = #{lastLoggedInUser},
+        isActive = #{isActive},
+        createdBy = #{createdBy},
+        createdDate = #{createdDate},
+        updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate}
+        WHERE id = #{id};
+    </update>
+
+    <select id="getPosById" resultType="Pos" resultOrdered="true">
+        SELECT * FROM poses WHERE id=#{id};
+    </select>
+
+    <select id="getPosByUserId" resultType="Pos" resultOrdered="true">
+        SELECT * FROM poses WHERE loggedInUser=#{id};
+    </select>
+
+    <select id="getPosByPosImeiOrSerial" resultType="Pos" resultOrdered="true">
+        SELECT * FROM poses WHERE posImei=#{posImei} OR serialNo = #{serialNo};
+    </select>
+
+    <select id="getPosByPosMda" resultType="Pos" resultOrdered="true">
+        SELECT * FROM poses WHERE mdaId = #{mdaId};
+    </select>
+
+    <select id="getPosByActivationCode" resultType="Pos" resultOrdered="true" parameterType="ActivatePosDto">
+        SELECT * FROM poses WHERE serialNo=#{serialNo} AND activationCode=#{activationCode};
+    </select>
+
+    <select id="getPosByActivationSerial" resultType="Pos" resultOrdered="true" parameterType="ActivatePosDto">
+        SELECT * FROM poses WHERE serialNo=#{serialNo} AND isActive = 0;
+    </select>
+
+    <select id="selectAllPos" resultType="PosDto">
+        SELECT * FROM poses;
+    </select>
+
+    <select id="getCountPos" resultType="int">
+        SELECT COUNT(Id) FROM poses;
+    </select>
+
+    <select id="selectAllPosesPaged" parameterType="PageFinder" resultType="PosDto">
+        SELECT * FROM poses_list_view ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+
+    <select id="searchPos" resultType="PosDto" parameterType="PosDto">
+        SELECT * FROM poses_list_view WHERE os like #{os} OR man like #{man} OR
+        model like #{model} OR serialNo like #{serialNo} OR posImei like #{posImei} OR osVer like #{osVer};
+    </select>
+
+<!--    <select id="selectAllPosesPaged" parameterType="PageFinder" resultType="PosDto">-->
+<!--        SELECT poses.Id AS id, pos_metas.os As os, pos_metas.osVer As osVer, pos_metas.man As man, pos_metas.model As model, pos_metas.simSlot As simSlot,-->
+<!--        pos_metas.printerSize As printerSize, pos_metas.printer As printer, pos_metas.battery As battery, pos_metas.charger As charger, poses.posImei As posImei,-->
+<!--        poses.serialNo As serialNo, poses.isAssigned As isAssigned, poses.activationCode As activationCode, poses.isActive As Activation, mdas.name As mdaName,-->
+<!--        mda_offices.name As mdaOffice, users.email As loggedInUser, poses.lastLoggedInUser As lastLoggedInUser, poses.posDeviceSerial AS posDeviceSerial FROM poses INNER JOIN pos_metas  ON poses.posMetaId = pos_metas.Id-->
+<!--        LEFT JOIN mdas ON poses.mdaId = mdas.Id LEFT JOIN users ON poses.loggedInUser = users.Id LEFT JOIN mda_offices ON poses.mdaOfficeId = mda_offices.Id ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+
+<!--    <select id="searchPos" resultType="PosDto">-->
+<!--        SELECT poses.Id AS id, pos_metas.os As os, pos_metas.osVer As osVer, pos_metas.man As man, pos_metas.model As model, pos_metas.simSlot As simSlot,-->
+<!--        pos_metas.printerSize As printerSize, pos_metas.printer As printer, pos_metas.battery As battery, pos_metas.charger As charger, poses.posImei As posImei,-->
+<!--        poses.serialNo As serialNo, poses.isAssigned As isAssigned, poses.activationCode As activationCode, poses.isActive As Activation, mdas.name As mdaName,-->
+<!--        mda_offices.name As mdaOffice, users.email As loggedInUser, poses.lastLoggedInUser As lastLoggedInUser, poses.posDeviceSerial AS posDeviceSerial FROM poses INNER JOIN pos_metas  ON poses.posMetaId = pos_metas.Id-->
+<!--        LEFT JOIN mdas ON poses.mdaId = mdas.Id LEFT JOIN users ON poses.loggedInUser = users.Id LEFT JOIN mda_offices ON poses.mdaOfficeId = mda_offices.Id WHERE pos_metas.os like #{Os} OR pos_metas.man like #{man} OR-->
+<!--        pos_metas.model like #{model} OR poses.serialNo like #{serialNo} OR poses.posImei like #{posImei} OR osVer like #{osVer};-->
+<!--    </select>-->
+
+
+    <select id="getCountMdaPos" resultType="int">
+        SELECT COUNT(id) FROM poses_list_view WHERE mdaId = #{mdaId} AND isActive = #{isActive};
+    </select>
+
+    <select id="getCountProjectPos" resultType="int">
+        SELECT COUNT(id) FROM poses_list_view WHERE businessId = #{businessId} AND isActive = #{isActive};
+    </select>
+
+    <select id="getCountAllMdaPos" resultType="int">
+        SELECT COUNT(id) FROM poses_list_view WHERE isActive = #{isActive};
+    </select>
+
+    <select id="getCountAllMdaPosMega" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM pos_count WHERE isActive = #{status}
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>;
+    </select>
+
+<!--    <select id="getCountMdaPos" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM poses WHERE mdaId = #{mdaId} AND isActive = #{isActive};-->
+<!--    </select>-->
+
+<!--    <select id="getCountAllMdaPos" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM poses WHERE isActive = #{isActive};-->
+<!--    </select>-->
+
+    <select id="selectAllMdPosesPaged" parameterType="PageFinder" resultType="PosDto">
+        SELECT * FROM poses_list_view WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+    <select id="selectAllProPosesPaged" parameterType="PageFinder" resultType="PosDto">
+        SELECT * FROM poses_list_view WHERE businessId = #{businessId} AND isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+<!--    <select id="selectAllMdPosesPaged" parameterType="PageFinder" resultType="PosDto">-->
+<!--        SELECT * FROM poses_list_view WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+
+    <select id="searchMdaPos" resultType="PosDto" parameterType="PosDto">
+        SELECT * FROM poses_list_view WHERE os like #{os} OR man like #{man} OR
+        model like #{model} OR serialNo like #{serialNo} OR posImei like #{posImei} OR osVer like #{osVer} AND mdaId = #{mdaId} AND isActive = 1;
+    </select>
+
+    <select id="searchProjectPos" resultType="PosDto" parameterType="PosDto">
+        SELECT * FROM poses_list_view WHERE os like #{os} OR man like #{man} OR
+        model like #{model} OR serialNo like #{serialNo} OR posImei like #{posImei} OR osVer like #{osVer} AND businessId = #{businessId} AND isActive = 1;
+    </select>
+
+<!--    <select id="selectAllMdPosesPaged" parameterType="PageFinder" resultType="PosDto">-->
+<!--        SELECT poses.Id AS id, pos_metas.os As os, pos_metas.osVer As osVer, pos_metas.man As man, pos_metas.model As model, pos_metas.simSlot As simSlot,-->
+<!--        pos_metas.printerSize As printerSize, pos_metas.printer As printer, pos_metas.battery As battery, pos_metas.charger As charger, poses.posImei As posImei,-->
+<!--        poses.serialNo As serialNo, poses.isAssigned As isAssigned, poses.activationCode As activationCode, poses.isActive As Activation, mdas.name As mdaName,-->
+<!--        mda_offices.name As mdaOffice, users.email As loggedInUser, poses.lastLoggedInUser As lastLoggedInUser, poses.posDeviceSerial AS posDeviceSerial FROM poses INNER JOIN pos_metas  ON poses.posMetaId = pos_metas.Id-->
+<!--        LEFT JOIN mdas ON poses.mdaId = mdas.Id LEFT JOIN users ON poses.loggedInUser = users.Id LEFT JOIN mda_offices ON poses.mdaOfficeId = mda_offices.Id WHERE poses.mdaId = #{mdaId} AND poses.isActive = 1 ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+
+<!--    <select id="searchMdaPos" resultType="PosDto">-->
+<!--        SELECT poses.Id AS id, pos_metas.os As os, pos_metas.osVer As osVer, pos_metas.man As man, pos_metas.model As model, pos_metas.simSlot As simSlot,-->
+<!--        pos_metas.printerSize As printerSize, pos_metas.printer As printer, pos_metas.battery As battery, pos_metas.charger As charger, poses.posImei As posImei,-->
+<!--        poses.serialNo As serialNo, poses.isAssigned As isAssigned, poses.activationCode As activationCode, poses.isActive As Activation, mdas.name As mdaName,-->
+<!--        mda_offices.name As mdaOffice, users.email As loggedInUser, poses.lastLoggedInUser As lastLoggedInUser, poses.posDeviceSerial AS posDeviceSerial FROM poses INNER JOIN pos_metas  ON poses.posMetaId = pos_metas.Id-->
+<!--        LEFT JOIN mdas ON poses.mdaId = mdas.Id LEFT JOIN users ON poses.loggedInUser = users.Id LEFT JOIN mda_offices ON poses.mdaOfficeId = mda_offices.Id WHERE pos_metas.os like #{Os} OR pos_metas.man like #{man} OR-->
+<!--        pos_metas.model like #{model} OR poses.serialNo like #{serialNo} OR poses.posImei like #{posImei} OR osVer like #{osVer} AND poses.mdaId = #{mdaId} AND poses.isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="selectAllPosWhere" resultType="PosDto">-->
+<!--        SELECT * FROM Poss WHERE role IN (#{roleType}) ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+
+
+    <select id="getCountPosWhereMda" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(Id) FROM users WHERE mdaId = #{mdaId} AND isActive = 1;
+    </select>
+
+    <select id="getCountPosWhereProject" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(Id) FROM users WHERE businessId = #{businessId} AND isActive = 1;
+    </select>
+
+    <select id="selectAllUserWhereMda" parameterType="PageFinder" resultType="PosDto">
+        SELECT * FROM users WHERE mdaId = #{mdaId} ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC LIMIT #{from}, #{recordsPerPage};
+    </select>
+
+    <select id="posSummaryList" parameterType="PageFinder" resultType="PosSummaryListDto">
+        SELECT COUNT(id) AS total
+        <if test="status == true">
+            , MAX(businessName) AS business
+            , MAX(businessId) AS businessId
+        </if>
+        <if test="businessId > 0">
+            , MAX(mdaName) AS mda
+            , MAX(mdaId) AS mdaId
+        </if>
+        <if test="mdaId > 0">
+            , MAX(officeName) AS office
+            , MAX(mdaOfficeId) AS officeId
+        </if>
+<!--        <if test="officeId > 0">-->
+<!--        </if>-->
+        FROM pos_active_inactive_view
+        <if test="status == true">
+            GROUP BY businessId
+        </if>
+        <if test="businessId > 0">
+            WHERE businessId = #{businessId}
+            GROUP BY mdaId
+        </if>
+        <if test="mdaId > 0">
+            WHERE mdaId = #{mdaId}
+            GROUP BY mdaOfficeId
+        </if>
+<!--        <if test="officeId > 0">-->
+<!--            WHERE mdaOfficeId = #{officeId}-->
+<!--            GROUP BY mdaOfficeId-->
+<!--        </if>-->
+    </select>
+
+    <select id="posSummaryListAlt" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(id) FROM pos_active_inactive_view WHERE status = 1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+        </if>
+    </select>
+<!--    <select id="xsearchMdaPos" resultType="PosDto">-->
+<!--        SELECT * FROM poses WHERE Name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} AND isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="getCountPosWhere" parameterType="org.bizzdeskgroup.Dtos.Query.PageFinder" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM users WHERE role IN-->
+<!--        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">-->
+<!--            #{role}-->
+<!--        </foreach>;-->
+<!--    </select>-->
+<!--    <select id="selectAllUserWhere" parameterType="org.bizzdeskgroup.Dtos.Query.PageFinder" resultType="PosDto">-->
+<!--        SELECT * FROM users WHERE role IN-->
+<!--        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">-->
+<!--            #{role}-->
+<!--        </foreach>-->
+<!--        ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+<!--    <select id="searchPos" resultType="Pos">-->
+<!--        SELECT * FROM poses WHERE email like #{email} OR phone like #{phone} OR firstName like #{firstName} OR lastName like #{lastName};-->
+<!--    </select>-->
+    <!--    <if test="orderBy == null">-->
+    <!--        , id-->
+    <!--    </if>-->
+</mapper>

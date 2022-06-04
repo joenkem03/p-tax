@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="NonIndividual">
+    <insert id="Create" parameterType="NonIndividual">
+        INSERT INTO non_individuals
+        (companyName,
+        cacRegNo,
+        companyAddress,
+        payerId,
+        city,
+        lgaId,
+        phoneNumber1,
+        phoneNumber2,
+        email,
+        website,
+        temporaryTin,
+        jtbTin,
+        nin,
+        companyRegistrationDate,
+        companyCommencementDate,
+        businessType,
+        businessId,
+        createdBy,
+        createdDate)
+        VALUES
+        (#{companyName},
+        #{cacRegNo},
+        #{companyAddress},
+        #{payerId},
+        #{city},
+        #{lgaId},
+        #{phoneNumber1},
+        #{phoneNumber2},
+        #{email},
+        #{website},
+        #{temporaryTin},
+        #{jtbTin},
+        #{nin},
+        #{companyRegistrationDate},
+        #{companyCommencementDate},
+        #{businessType},
+        #{businessId},
+        #{createdBy},
+        #{createdDate});
+    </insert>
+
+    <select id="GetNonIndUpdate" resultType="NonIndividual">
+        SELECT * FROM non_individuals WHERE id = #{id}
+    </select>
+    
+    <update id="Edit" parameterType="NonIndividual">
+        UPDATE non_individuals
+        SET
+        companyName = #{companyName},
+        cacRegNo = #{cacRegNo},
+        companyAddress = #{companyAddress},
+        payerId = #{payerId},
+        city = #{city},
+        lgaId = #{lgaId},
+        phoneNumber1 = #{phoneNumber1},
+        phoneNumber2 = #{phoneNumber2},
+        email = #{email},
+        website = #{website},
+        temporaryTin = #{temporaryTin},
+        jtbTin = #{jtbTin},
+        companyRegistrationDate = #{companyRegistrationDate},
+        companyCommencementDate = #{companyCommencementDate},
+        businessType = #{businessType},
+        businessId = #{businessId},
+        createdBy = #{createdBy},
+        createdDate = #{createdDate},
+        updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate},
+        isActive = #{isActive}
+        WHERE id = #{id};
+    </update>
+
+<!--    <select id="searchNonIndividual" resultType="NonIndividualDto" parameterType="NonIndividual">-->
+<!--        SELECT * FROM tax_payers_view-->
+<!--        WHERE temporaryTin LIKE #{temporaryTin} OR jtbTin LIKE #{jtbTin} OR phone LIKE #{phoneNumber2} OR phoneNumber1 LIKE #{phoneNumber1}-->
+<!--        OR users.email LIKE #{email} ORDER BY #{cacRegNo} ASC-->
+<!--        <if test="recordsPerPage > 0">-->
+<!--            LIMIT #{from}, #{recordsPerPage}-->
+<!--        </if>;-->
+<!--    </select>-->
+
+<!--    <select id="getNonIndividual" resultType="NonIndividualDto">-->
+<!--        SELECT * FROM tax_payers_view-->
+<!--        WHERE payerId = #{payerId} OR temporaryTin = #{payerId} OR jtbTin = #{payerId} OR phone = #{payerId} OR phoneNumber1 = #{payerId};-->
+<!--    </select>-->
+
+<!--    <select id="getNonIndividualList" resultType="NonIndividualDto">-->
+<!--        SELECT * FROM tax_payers_view-->
+<!--        <if test="businessId > 0">-->
+<!--            WHERE businessId = #{businessId}-->
+<!--        </if>-->
+<!--        <if test="recordsPerPage > 0">-->
+<!--            LIMIT #{from}, #{recordsPerPage}-->
+<!--        </if>;-->
+<!--    </select>-->
+
+
+        <select id="searchNonIndividual" resultType="NonIndividualDto" parameterType="NonIndividual">
+        SELECT
+        users.id AS payerId,
+        companyName,
+        cacRegNo,
+        companyAddress,
+        payerId,
+        city,
+        lgaId,
+        phoneNumber1,
+        phoneNumber2,
+        non_individuals.email,
+        website,
+        temporaryTin,
+        jtbTin,
+        companyRegistrationDate,
+        companyCommencementDate,
+        businessType,
+        firstName AS registererFirstName,
+        lastName AS registererLastName,
+        users.email AS registererEmail,
+        phone AS registererPhone,
+        non_individuals.createdBy AS enumBy,
+        non_individuals.createdDate AS enumDate
+        FROM non_individuals
+        LEFT JOIN users ON non_individuals.payerId = users.id
+        WHERE temporaryTin LIKE #{temporaryTin} OR jtbTin LIKE #{jtbTin} OR phone LIKE #{phoneNumber2} OR phoneNumber1 LIKE #{phoneNumber1}
+        OR users.email LIKE #{email} ORDER BY #{cacRegNo} ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getNonIndividual" resultType="NonIndividualDto">
+        SELECT
+        users.id AS payerId,
+        companyName,
+        cacRegNo,
+        companyAddress,
+        payerId,
+        city,
+        lgaId,
+        phoneNumber1,
+        phoneNumber2,
+        non_individuals.email,
+        website,
+        temporaryTin,
+        jtbTin,
+        companyRegistrationDate,
+        companyCommencementDate,
+        businessType,
+        firstName AS registererFirstName,
+        lastName AS registererLastName,
+        users.email AS registererEmail,
+        phone AS registererPhone,
+        non_individuals.createdBy AS enumBy,
+        non_individuals.createdDate AS enumDate
+        FROM non_individuals
+        LEFT JOIN users ON non_individuals.payerId = users.id
+        WHERE payerId = #{payerId} OR temporaryTin = #{payerId} OR jtbTin = #{payerId} OR phone = #{payerId} OR phoneNumber1 = #{payerId};
+    </select>
+
+    <select id="getNonIndividualList" resultType="NonIndividualDto">
+        SELECT
+        users.id AS payerId,
+        companyName,
+        cacRegNo,
+        companyAddress,
+        payerId,
+        city,
+        lgaId,
+        phoneNumber1,
+        phoneNumber2,
+        non_individuals.email,
+        website,
+        temporaryTin,
+        jtbTin,
+        companyRegistrationDate,
+        companyCommencementDate,
+        businessType,
+        firstName AS registererFirstName,
+        lastName AS registererLastName,
+        users.email AS registererEmail,
+        phone AS registererPhone,
+        non_individuals.createdBy AS enumBy,
+        non_individuals.createdDate AS enumDate
+        FROM non_individuals
+        LEFT JOIN users ON non_individuals.payerId = users.id
+        <if test="businessId > 0">
+            WHERE users.businessId = #{businessId}
+        </if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+
+<!--    <select id="getNonIndividualListCount" resultType="int">-->
+<!--        SELECT COUNT(payerId) FROM tax_payers_view-->
+<!--        <if test="businessId > 0">-->
+<!--            WHERE businessId = #{businessId}-->
+<!--        </if>;-->
+<!--    </select>-->
+    <select id="getNonIndividualListCount" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM non_individuals
+        <if test="businessId > 0">
+            WHERE businessId = #{businessId}
+        </if>
+        <if test="agentId > 0">
+            WHERE createdBy = #{agentId}
+        </if>;
+    </select>
+
+    <select id="getNonIndividualListCountMonthly" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM non_individuals WHERE createdDate = YEAR(#{createdDate}) AND transactionMonthNo = MONTH(#{createdDate})
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+</mapper>

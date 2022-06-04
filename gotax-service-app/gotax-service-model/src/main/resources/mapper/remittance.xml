@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Remittance">
+    <insert id="insert" parameterType="Remittance">
+        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        INSERT INTO remittances
+        (remittanceNo,
+        totalAmount,
+        userId,
+        terminalId,
+        status,
+        mdaId,
+        businessId,
+        createdBy,
+        createdDate,
+        mdaOfficeId)
+        VALUES
+        (#{remittanceNo},
+        #{totalAmount},
+        #{userId},
+        #{terminalId},
+        #{status},
+        #{mdaId},
+        #{businessId},
+        #{createdBy},
+        #{createdDate},
+        #{mdaOfficeId});
+    </insert>
+    <update id="update" parameterType="Remittance">
+        UPDATE remittances
+        SET
+        updatedBy = #{updatedBy},
+        status = #{status},
+        updatedDate = #{updatedDate},
+        isActive = #{isActive}
+        WHERE id = #{id};
+    </update>
+    <select id="AllRemittancesPaged" parameterType="PageFinder" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        ORDER BY generatedDate DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllProjectRemittancesPaged" parameterType="PageFinder" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY generatedDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllMdaRemittancesPaged" parameterType="PageFinder" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE mdaId = #{mdaId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY generatedDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+
+    <select id="AllMdaOfficeRemittancesPaged" parameterType="PageFinder" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE mdaOfficeId = #{officeId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY generatedDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllMdaAgentRemittancesPaged" parameterType="PageFinder" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE mdaId = #{mdaId} AND agentId = #{agentId} AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        ORDER BY generatedDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+<!--    <select id="SearchRemittances" resultType="RemittanceDto" parameterType="Remittance">-->
+<!--        SELECT * FROM remittances_view WHERE remittanceNo like #{remittanceNo} OR operatorFirstName like #{operatorFirstName} OR operatorLastName like #{operatorLastName} ORDER BY generatedDate DESC;-->
+<!--    </select>-->
+<!--    <select id="SearchMdaRemittances" resultType="RemittanceDto" parameterType="Remittance">-->
+<!--        SELECT * FROM remittances_view WHERE remittanceNo like #{remittanceNo} OR operatorFirstName like #{operatorFirstName} OR operatorLastName like #{operatorLastName}-->
+<!--        AND mdaId = #{mdaId} ORDER BY generatedDate DESC;-->
+<!--    </select>-->
+
+    <select id="SearchRemittances" resultType="RemittanceDto" parameterType="Remittance">
+        SELECT * FROM remittances_view WHERE remittanceNo like #{remittanceNo} ORDER BY generatedDate DESC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="SearchMdaRemittances" resultType="RemittanceDto" parameterType="Remittance">
+        SELECT * FROM remittances_view WHERE remittanceNo like #{remittanceNo}
+        <if test="terminalId > 0">AND businessId = #{mdaId} </if>
+        <if test="mdaId > 0">AND mdaId = #{mdaId} </if>
+        <if test="userId > 0">AND agentId = #{userId} </if>
+        ORDER BY generatedDate DESC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="SearchAgentRemittances" resultType="RemittanceDto" parameterType="Remittance">
+        SELECT * FROM remittances_view WHERE remittanceNo like #{remittanceNo} AND mdaId = #{mdaId} AND agentId = #{userId} ORDER BY generatedDate DESC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="SingleMdaRemittances" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE remittanceNo = #{remittanceNo} AND mdaId = #{mdaId};
+    </select>
+    <select id="SingleRemittances" resultType="RemittanceDto">
+        SELECT * FROM remittances_view WHERE remittanceNo = #{remittanceNo};
+    </select>
+    <select id="SingleRemittancesWithId" resultType="IntRemittanceResponseDto">
+        SELECT * FROM remittances_view WHERE remittanceNo = #{remittanceNo};
+    </select>
+    <select id="CheckRemittancesPending" resultType="RemittanceIntDto">
+        SELECT * FROM remittances_view WHERE agentId = #{id} AND remittanceStatus = 0 ORDER BY id DESC LIMIT 0, 1;
+    </select>
+    <select id="RemittancesByRef" resultType="Remittance">
+        SELECT * FROM remittances WHERE remittanceNo = #{transactionReference} AND isActive = 1;
+    </select>
+    <select id="getCount" resultType="int">
+        SELECT COUNT(id) FROM remittances_view WHERE DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>;
+    </select>
+    <select id="getCountProject" parameterType="PageFinder"  resultType="int">
+        SELECT COUNT(id) FROM remittances_view WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getCountMda" parameterType="PageFinder"  resultType="int">
+        SELECT COUNT(id) FROM remittances_view WHERE mdaId = #{mdaId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getCountMdaOffice" parameterType="PageFinder"  resultType="int">
+        SELECT COUNT(id) FROM remittances_view WHERE mdaOfficeId = #{officeId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getCountAgent" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(id) FROM remittances_view WHERE mdaId = #{mdaId} AND agentId = #{agentId} AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+    <select id="getSum" resultType="double" parameterType="PageFinder">
+        SELECT SUM(totalAmount) FROM remittances_view WHERE DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>;
+    </select>
+    <select id="getSumProject" parameterType="PageFinder"  resultType="double">
+        SELECT SUM(totalAmount) FROM remittances_view WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getSumMda" parameterType="PageFinder"  resultType="double">
+        SELECT SUM(totalAmount) FROM remittances_view WHERE mdaId = #{mdaId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getSumMdaOffice" parameterType="PageFinder"  resultType="double">
+        SELECT SUM(totalAmount) FROM remittances_view WHERE mdaOfficeId = #{officeId}
+        <if test="filter == 1">
+            AND remittanceStatus = #{status}
+        </if>
+        AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getSumAgent" parameterType="PageFinder" resultType="double" >
+        SELECT SUM(totalAmount) FROM remittances_view WHERE agentId = #{agentId} AND DATE(generatedDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="getSumAgentPaid" parameterType="PageFinder" resultType="double" >
+        SELECT SUM(totalAmount) FROM remittances_view WHERE agentId = #{agentId} AND MONTH(paymentDate) = MONTH(#{startTransactionDate}) AND YEAR(paymentDate) = YEAR(#{startTransactionDate});
+    </select>
+    <select id="getCountAgentPaid" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(id) FROM remittances_view WHERE agentId = #{agentId} AND MONTH(paymentDate) = MONTH(#{startTransactionDate}) AND YEAR(paymentDate) = YEAR(#{startTransactionDate});
+    </select>
+
+
+    <select id="AgentYTDAmount" resultType="double" parameterType="RemittanceIntDto">
+        SELECT SUM(totalAmount) FROM remittances_view WHERE YEAR(paymentDate) = YEAR(#{generatedDate}) AND remittanceStatus = 1
+        AND mdaId = #{mdaId} AND agentId = #{agentId};
+    </select>
+    <select id="AgentYTDCount" resultType="int" parameterType="RemittanceIntDto">
+        SELECT COUNT(id) FROM remittances_view WHERE YEAR(paymentDate) = YEAR(#{generatedDate}) AND remittanceStatus = 1
+        AND mdaId = #{mdaId} AND agentId = #{agentId};
+    </select>
+    <select id="AgentMonthly" resultType="MonthlyTransactionsDto" parameterType="RemittanceIntDto">
+        SELECT SUM(total) AS total, SUM(count) AS count, MAX(transactionMonth) AS transactionMonth, MAX(transactionYear)
+        AS transactionYear, MAX(transactionMonthNo) AS transactionMonthNo FROM monthly_agent_trans_view WHERE agentId = #{agentId} AND mdaId = #{mdaId}
+        ORDER BY transactionYear DESC,  transactionMonthNo ASC LIMIT 0, 12;
+    </select>
+    <select id="MonthSumAgent" resultType="double" parameterType="PosTransaction">
+        SELECT SUM(total) AS total FROM monthly_agent_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND agentId = #{operatorId} AND mdaId = #{mdaId};
+    </select>
+    <select id="MonthCountAgent" resultType="double" parameterType="PosTransaction">
+        SELECT SUM(count) AS count FROM monthly_agent_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND agentId = #{operatorId} AND mdaId = #{mdaId};
+    </select>
+    <select id="ListAgentRemittancesPending" resultType="Remittance">
+        SELECT * FROM remittances WHERE userId = #{id} AND status = 0
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="ListAgentRemittancesPendingMulti" resultType="Remittance">
+        SELECT * FROM remittances WHERE
+        <if test="mdaId > 0">
+            remittances.mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            remittances.businessId = #{businessId}
+        </if>
+        AND userId = #{id} AND status = 0
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+
+    <select id="CountRemitMega" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM remittances_view WHERE YEAR(generatedDate) = YEAR(#{startTransactionDate}) AND MONTH(generatedDate) = MONTH(#{startTransactionDate})
+        <if test="status == 1">
+            AND status = 1
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+
+
+
+    <select id="SumRemitMega" resultType="double" parameterType="PageFinder">
+        SELECT SUM(totalAmount) FROM remittances_view WHERE YEAR(generatedDate) = YEAR(#{startTransactionDate}) AND MONTH(generatedDate) = MONTH(#{startTransactionDate})
+        <if test="status == 1">
+            AND status = 1
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="agentId > 0">
+            AND createdBy = #{agentId}
+        </if>;
+    </select>
+
+
+    <select id="remSummaryList" parameterType="PageFinder" resultType="RemitSummaryListDto">
+        SELECT COUNT(id) AS count, SUM(totalAmount) AS amountGenerated
+        <if test="status == true">
+            , MAX(businessName) AS business
+            , MAX(businessId) AS businessId
+        </if>
+        <if test="businessId > 0">
+            , MAX(mdaName) AS mda
+            , MAX(mdaId) AS mdaId
+        </if>
+        <if test="mdaId > 0">
+            , MAX(officeName) AS office
+            , MAX(mdaOfficeId) AS officeId
+        </if>
+        <if test="officeId > 0">
+            , MAX(firstName) AS officerFirstName
+            , MAX(lastName) AS officerLastName
+        </if>
+        FROM remittance_summary_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="status == true">
+            GROUP BY businessId
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+            GROUP BY mdaId
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+            GROUP BY mdaOfficeId
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+            GROUP BY createdBy
+        </if>
+    </select>
+
+
+
+    <select id="remSummaryListAlt" parameterType="PageFinder" resultType="double">
+        SELECT SUM(totalAmount) FROM remittance_summary_view WHERE DATE(createdDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) AND status = 1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="officeId > 0">
+            AND mdaOfficeId = #{officeId}
+        </if>
+    </select>
+
+
+</mapper>

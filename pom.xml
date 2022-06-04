@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.bizzdeskgroup</groupId>
+    <artifactId>gotax-service</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+<!--        <maven.compiler.source>11</maven.compiler.source>-->
+<!--        <maven.compiler.target>11</maven.compiler.target>-->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <kumuluzee.version>3.6.1</kumuluzee.version>
+        <kumuluzee-rest.version>1.1.0</kumuluzee-rest.version>
+        <kumuluzee-logs.version>1.3.0</kumuluzee-logs.version>
+        <kumuluzee-config.version>1.2.0</kumuluzee-config.version>
+        <kumuluzee-discovery.version>1.1.1</kumuluzee-discovery.version>
+        <kumuluzee-fault-tolerance.version>2.0.1</kumuluzee-fault-tolerance.version>
+        <kumuluzee-metrics.version>2.0.1</kumuluzee-metrics.version>
+        <kumuluzee-rest.version>1.2.3</kumuluzee-rest.version>
+        <kumuluzee-cors.version>1.0.5</kumuluzee-cors.version>
+        <kumuluzee-swagger.version>1.2.2</kumuluzee-swagger.version>
+        <kumuluzee-logs.version>1.3.1</kumuluzee-logs.version>
+        <kumuluzee-streaming.version>1.1.0</kumuluzee-streaming.version>
+        <kumuluzee-graphql.version>1.0.2</kumuluzee-graphql.version>
+        <kumuluzee-jwt-auth.version>1.1.3</kumuluzee-jwt-auth.version>
+        <kumuluzee-arquillian-container.version>1.1.0</kumuluzee-arquillian-container.version>
+<!--        <arquillian.version>1.4.0.Final</arquillian.version>-->
+        <postgresql.version>42.1.4</postgresql.version>
+        <httpclient.version>4.5.3</httpclient.version>
+        <mapstruct.version>1.3.1.Final</mapstruct.version>
+        <morphia.version>1.5.6</morphia.version>
+<!--        <mongodb.version>3.11.1</mongodb.version>-->
+        <mysql.version>8.0.23</mysql.version>
+        <mariadb.version>2.7.4</mariadb.version>
+        <orika-core.version>1.5.4</orika-core.version>
+        <mybatis.version>3.5.3</mybatis.version>
+        <kumuluzee-cors.version>1.0.5</kumuluzee-cors.version>
+
+        <javax.el.version>3.0.0</javax.el.version>
+<!--        <hibernate-validator.version>6.0.13.Final</hibernate-validator.version>-->
+<!--        <validation-api.version>2.0.1.Final</validation-api.version>-->
+        <kumuluzee-bean-validation.version>3.12.0</kumuluzee-bean-validation.version>
+        <kumuluzee-reactive-vertx.version>1.0.0-SNAPSHOT</kumuluzee-reactive-vertx.version>
+        <PepipostLib.version>1.0-SNAPSHOT</PepipostLib.version>
+        <log4j-core.version>2.14.1</log4j-core.version>
+        <log4j-api.version>2.14.1</log4j-api.version>
+        <log4j.version>1.2.17</log4j.version>
+        <infobip-api-java-client.version>3.1.0</infobip-api-java-client.version>
+        <joda-time.version>2.2</joda-time.version>
+        <org-apache-poi.version>5.1.0</org-apache-poi.version>
+        <pdfbox>3.0.0-RC1</pdfbox>
+    </properties>
+
+    <modules>
+        <module>gotax-service-app</module>
+<!--        <module>PepipostLib</module>-->
+    </modules>
+
+</project>

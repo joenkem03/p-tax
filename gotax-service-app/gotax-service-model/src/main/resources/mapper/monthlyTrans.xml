@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MonthlyTransactions">
+    <select id="All" resultType="MonthlyTransactionsDto">
+        SELECT SUM(total) AS total, SUM(amount) AS amount, SUM(fee) AS fee, SUM(commission) AS commission, MAX(transactionMonth) AS transactionMonth, MAX(transactionYear)
+        AS transactionYear, MAX(transactionMonthNo) AS transactionMonthNo  FROM monthly_trans_view GROUP BY transactionYear, transactionMonth ORDER BY transactionYear DESC,
+        transactionMonthNo ASC LIMIT 0, 12;
+    </select>
+    <select id="Project" resultType="MonthlyTransactionsDto">
+        SELECT SUM(total) AS total, SUM(amount) AS amount, SUM(fee) AS fee, SUM(commission) AS commission, MAX(transactionMonth) AS transactionMonth,
+        MAX(transactionYear) AS transactionYear, MAX(transactionMonthNo) AS transactionMonthNo FROM monthly_trans_view WHERE businessId = #{id} GROUP BY mdaId,
+        transactionYear, transactionMonth ORDER BY transactionYear DESC, transactionMonthNo ASC LIMIT 0, 12;
+    </select>
+    <select id="Mda" resultType="MonthlyTransactionsDto" parameterType="Transaction">
+        SELECT SUM(total) AS total, SUM(amount) AS amount, SUM(fee) AS fee, SUM(commission) AS commission, MAX(transactionMonth) AS transactionMonth, MAX(transactionYear)
+        AS transactionYear, MAX(transactionMonthNo) AS transactionMonthNo FROM monthly_trans_view WHERE businessId = #{businessId} AND mdaId = #{mdaId} GROUP BY transactionYear,
+        transactionMonth ORDER BY transactionYear DESC,  transactionMonthNo ASC LIMIT 0, 12;
+    </select>
+    <select id="YTDCountAll" resultType="double" parameterType="Transaction">
+        SELECT SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = #{transactionReference};
+    </select>
+    <select id="YTDCountProject" resultType="double" parameterType="Transaction">
+        SELECT SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = #{transactionReference} AND businessId = #{businessId};
+    </select>
+    <select id="YTDCountMda" resultType="double" parameterType="Transaction">
+        SELECT SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = #{transactionReference} AND businessId = #{businessId} AND mdaId = #{mdaId};
+    </select>
+    <select id="YTDSumAll" resultType="double" parameterType="Transaction" >
+        SELECT SUM(total) AS total FROM monthly_trans_view WHERE transactionYear = #{transactionReference};
+    </select>
+    <select id="YTDSumProject" resultType="double" parameterType="Transaction">
+        SELECT SUM(total) AS total FROM monthly_trans_view WHERE transactionYear = #{transactionReference} AND businessId = #{businessId};
+    </select>
+    <select id="YTDSumMda" resultType="double" parameterType="Transaction">
+        SELECT SUM(total) AS total FROM monthly_trans_view WHERE transactionYear = #{transactionReference} AND businessId = #{businessId} AND mdaId = #{mdaId};
+    </select>
+
+
+    <select id="MonthCountAll" resultType="double" parameterType="Transaction">
+        SELECT SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate});
+    </select>
+    <select id="MonthCountProject" resultType="double" parameterType="Transaction">
+        SELECT SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId};
+    </select>
+    <select id="MonthCountMda" resultType="double" parameterType="Transaction">
+        SELECT SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId} AND mdaId = #{mdaId};
+    </select>
+    <select id="MonthSumAll" resultType="double" parameterType="Transaction" >
+        SELECT SUM(total) AS total FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate});
+    </select>
+    <select id="MonthSumProject" resultType="double" parameterType="Transaction">
+        SELECT SUM(total) AS total FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId};
+    </select>
+    <select id="MonthSumMda" resultType="double" parameterType="Transaction">
+        SELECT SUM(total) AS total FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId} AND mdaId = #{mdaId};
+    </select>
+
+
+
+    <select id="AltMonthSumAll" resultType="TransactionMonthlySummaryDto" parameterType="Transaction" >
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate});
+    </select>
+    <select id="AltMonthSumProject" resultType="TransactionMonthlySummaryDto" parameterType="Transaction">
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId};
+    </select>
+    <select id="AltMonthSumMda" resultType="TransactionMonthlySummaryDto" parameterType="Transaction">
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND mdaId = #{mdaId};
+    </select>
+
+    <select id="AltMonthSumAllAgent" resultType="TransactionMonthlySummaryDto" parameterType="Transaction" >
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND createdBy = #{createdBy};
+    </select>
+
+
+
+    <select id="MonthSumAllChannel" resultType="TransactionChannelSummaryDto" parameterType="Transaction" >
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, MAX(channel) AS channel, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) GROUP BY channel;
+    </select>
+    <select id="MonthSumProjectChannel" resultType="TransactionChannelSummaryDto" parameterType="Transaction">
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, MAX(channel) AS channel, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId} GROUP BY channel;
+    </select>
+    <select id="MonthSumMdaChannel" resultType="TransactionChannelSummaryDto" parameterType="Transaction">
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, MAX(channel) AS channel, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId} AND mdaId = #{mdaId} GROUP BY channel;
+    </select>
+
+
+
+
+    <select id="MonthSumByChannel" resultType="TransactionChannelSummaryDto" parameterType="Transaction" >
+        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, MAX(channel) AS channel, SUM(count)
+        AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND channel = #{channel}
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="officeId > 0">
+            AND officeId = #{officeId}
+        </if>
+        <if test="createdBy > 0">
+            AND createdBy = #{createdBy}
+        </if>
+        <if test="payerId > 0">
+            AND payerId = #{payerId}
+        </if>;
+    </select>
+<!--    <select id="MonthSumProjectChannel" resultType="TransactionChannelSummaryDto" parameterType="Transaction">-->
+<!--        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, MAX(channel) AS channel, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId} GROUP BY channel;-->
+<!--    </select>-->
+<!--    <select id="MonthSumMdaChannel" resultType="TransactionChannelSummaryDto" parameterType="Transaction">-->
+<!--        SELECT SUM(total) AS totalRev, SUM(fee) AS income, SUM(amount) AS remitted, MAX(channel) AS channel, SUM(count) AS count FROM monthly_trans_view WHERE transactionYear = YEAR(#{transactionDate}) AND transactionMonthNo = MONTH(#{transactionDate}) AND businessId = #{businessId} AND mdaId = #{mdaId} GROUP BY channel;-->
+<!--    </select>-->
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MdaDto">
+
+    <select id="getAllPaged" resultType="MdaDto" parameterType="PageFinder">
+        SELECT * FROM mdas WHERE isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdasWhereLike" resultType="MdaDto" parameterType="Mda">
+        SELECT * FROM mdas WHERE name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} order by #{sortBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+<!--    <select id="getAllPagedS" resultMap="MdaServiceDto" parameterType="MdaOffice">-->
+<!--        SELECT * FROM mda_offices WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+<!--    <select id="getMdaServicesWhereLikeS" resultType="MdaServiceDto">-->
+<!--        SELECT * FROM mda_services WHERE name like #{name} OR code like #{code} AND isActive = 1 order by #{name}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC;-->
+<!--    </select>-->
+
+<!--    <select id="getAllPagedO" resultMap="MdaOfficeDto" parameterType="MdaOffice">-->
+<!--        SELECT * FROM mda_offices WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+<!--    <select id="getMdaOfficesWhereLikeO" resultType="MdaOfficeDto">-->
+<!--        SELECT * FROM mda_offices WHERE name like #{name} OR officeCode like #{officeCode} AND mdaId = #{mdaId} AND isActive = 1 order by #{sortBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC;-->
+<!--    </select>-->
+</mapper>

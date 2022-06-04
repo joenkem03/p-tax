@@ -1,0 +1,10 @@
+org.bizzdeskgroup.api.v1.StateResource
+org.bizzdeskgroup.api.v1.OrganisationResource
+org.bizzdeskgroup.api.v1.DownloadResource
+org.bizzdeskgroup.api.v1.AdminResource
+org.bizzdeskgroup.api.v1.TransactionResource
+org.bizzdeskgroup.api.v1.UserReportResource
+org.bizzdeskgroup.api.v1.AgentResource
+org.bizzdeskgroup.api.v1.AssessmentResource
+org.bizzdeskgroup.api.v1.EmailResource
+org.bizzdeskgroup.api.v1.AuthenticateResource

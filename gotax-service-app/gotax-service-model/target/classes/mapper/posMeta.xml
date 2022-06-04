@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PosMeta">
+
+    <insert id="insert" parameterType="PosMeta">
+        <!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+        <!--            select last_insert_id();-->
+        <!--        </selectKey>-->
+        INSERT INTO pos_metas
+        (os,
+        osVer,
+        man,
+        model,
+        simSlot,
+        printerSize,
+        printer,
+        battery,
+        charger,
+        createdBy,
+        createdDate)
+        VALUES
+        (#{os},
+        #{osVer},
+        #{man},
+        #{model},
+        #{simSlot},
+        #{printerSize},
+        #{printer},
+        #{battery},
+        #{charger},
+        #{createdBy},
+        #{createdDate});
+    </insert>
+
+    <update id="update" parameterType="PosMeta">
+        UPDATE pos_metas SET
+        os = #{os},
+        osVer = #{osVer},
+        man = #{man},
+        model = #{model},
+        simSlot = #{simSlot},
+        printerSize = #{printerSize},
+        printer = #{printer},
+        battery = #{battery},
+        charger = #{charger},
+        createdBy = #{createdBy},
+        createdDate = #{createdDate}
+        WHERE id = #{id};
+    </update>
+
+    <select id="getPosMetaById" resultType="PosMetaDto" resultOrdered="true">
+        SELECT * FROM pos_metas WHERE id=#{id};
+    </select>
+
+    <select id="getPosMetaByByManModel" resultType="PosMetaDto" resultOrdered="true">
+        SELECT * FROM pos_metas WHERE man = #{man} AND model = #{model};
+    </select>
+
+<!--    <select id="getPosByPhoneCode" resultType="Pos" resultOrdered="true">-->
+<!--        SELECT * FROM pos_metas WHERE posImei=#{posImei} AND phoneConfirmationCode=#{email};-->
+<!--    </select>-->
+
+    <select id="selectAllPosMeta" resultType="PosMetaDto">
+        SELECT * FROM pos_metas
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getCountPosMeta" resultType="int">
+        SELECT COUNT(Id) FROM pos_metas;
+    </select>
+
+    <select id="selectAllPosMetasPaged" parameterType="PageFinder" resultType="PosDto">
+        SELECT * FROM pos_metas ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+<!--    <select id="searchPos" resultType="PosDto">-->
+<!--        SELECT * FROM pos_metas WHERE Name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} AND isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="selectAllPosWhere" resultType="PosDto">-->
+<!--        SELECT * FROM Poss WHERE role IN (#{roleType}) ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+
+
+    <select id="getCountPosWhereMda" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(Id) FROM users WHERE mdaId = #{mdaId} AND isActive = 1;
+    </select>
+    <select id="selectAllUserWhereMda" parameterType="PageFinder" resultType="PosDto">
+        SELECT * FROM users WHERE mdaId = #{mdaId} ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+<!--    <select id="searchMdaPos" resultType="PosDto">-->
+<!--        SELECT * FROM pos_metas WHERE Name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} AND isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="getCountPosWhere" parameterType="org.bizzdeskgroup.Dtos.Query.PageFinder" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM users WHERE role IN-->
+<!--        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">-->
+<!--            #{role}-->
+<!--        </foreach>;-->
+<!--    </select>-->
+<!--    <select id="selectAllUserWhere" parameterType="org.bizzdeskgroup.Dtos.Query.PageFinder" resultType="PosDto">-->
+<!--        SELECT * FROM users WHERE role IN-->
+<!--        <foreach item="role" collection="roleTypes" separator="," open="(" close=")">-->
+<!--            #{role}-->
+<!--        </foreach>-->
+<!--        ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+<!--    <select id="searchPos" resultType="Pos">-->
+<!--        SELECT * FROM posmetas WHERE email like #{email} OR phone like #{phone} OR firstName like #{firstName} OR lastName like #{lastName};-->
+<!--    </select>-->
+    <!--    <if test="orderBy == null">-->
+    <!--        , id-->
+    <!--    </if>-->
+</mapper>

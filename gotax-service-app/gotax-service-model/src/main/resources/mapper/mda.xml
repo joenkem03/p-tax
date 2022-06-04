@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Mda">
+
+    <insert id="insert" parameterType="Mda">
+        <!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+        <!--            select last_insert_id();-->
+        <!--        </selectKey>-->
+        INSERT INTO mdas (businessId, name, abbreviation, mdaCode, isRetaining, isRetainingByPercentage, retainingValue, createdBy, createdDate)
+        VALUES
+        (#{businessId}, #{name}, #{abbreviation}, #{mdaCode}, #{isRetaining}, #{isRetainingByPercentage}, #{retainingValue}, #{createdBy}, #{createdDate})
+    </insert>
+
+    <update id="update" parameterType="Mda">
+        UPDATE mdas SET name = #{name}, abbreviation = #{abbreviation}, mdaCode = #{mdaCode}, isRetaining = #{isRetaining}, isRetainingByPercentage = #{isRetainingByPercentage},
+        retainingValue = #{retainingValue}, isActive = #{isActive}, updatedBy = #{updatedBy}, updatedDate = #{updatedDate}
+        WHERE id = #{id};
+    </update>
+
+    <select id="getMdaById" resultType="Mda" resultOrdered="true">
+        SELECT * FROM mda_view WHERE id=#{id} AND isActive = 1;
+    </select>
+
+    <select id="getMdaByNameOrCode" resultType="Mda" resultOrdered="true">
+        SELECT id FROM mda_view WHERE name = #{name} OR mdaCode = #{mdaCode} OR abbreviation = #{abbreviation};
+    </select>
+
+    <select id="searchMda" resultType="Mda">
+        SELECT * FROM mda_view WHERE name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} AND isActive = 1;
+    </select>
+
+    <select id="getCountMda" resultType="int">
+        SELECT COUNT(Id) FROM mda_view WHERE isActive = 1;
+    </select>
+
+    <select id="getCountProjectMda" resultType="int">
+        SELECT COUNT(Id) FROM mda_view WHERE isActive = 1 AND businessId = #{id};
+    </select>
+
+    <select id="getCountMdaServices" resultType="int">
+        SELECT COUNT(Id) FROM mda_offices WHERE mdaId = #{id};
+    </select>
+
+<!--    <select id="getAllPaged" resultMap="MdaDto" parameterType="Mda">-->
+<!--        SELECT * FROM mdas WHERE isActive = 1 ORDER BY #{orderBy}-->
+<!--        <if test="orderBy == null">-->
+<!--            , id-->
+<!--        </if>-->
+<!--        ASC LIMIT #{from}, #{recordsPerPage};-->
+<!--    </select>-->
+
+    <select id="getMdasWhereLikex" resultType="Mda">
+        SELECT * FROM mda_view WHERE tin name #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} order by #{sortBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getAllPaged" resultType="MdaDto" parameterType="PageFinder">
+        SELECT * FROM mda_view WHERE isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getAllProjectPaged" resultType="MdaDto" parameterType="PageFinder">
+        SELECT * FROM mda_view WHERE isActive = 1 AND businessId = #{mdaId} ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdasWhereLike" resultType="MdaDto" parameterType="Mda">
+        SELECT * FROM mda_view WHERE name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} order by #{sortBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getProjectMdasWhereLike" resultType="MdaDto" parameterType="Mda">
+        SELECT * FROM mda_view WHERE name like #{name} OR mdaCode like #{mdaCode} OR abbreviation like #{abbreviation} AND isActive = 1
+        AND businessId = #{businessId} order by #{sortBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+</mapper>

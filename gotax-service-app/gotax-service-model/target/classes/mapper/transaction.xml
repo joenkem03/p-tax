@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Transaction">
+    <insert id="insert" parameterType="Transaction">
+        INSERT INTO transactions
+        (transactionId,
+        transactionReference,
+        transactionDate,
+        transactionDescription,
+        totalAmountPaid,
+        serviceAmount,
+        fee,
+        commission,
+        transactionType,
+        channel,
+        customerName,
+        customerPhone,
+        customerEmail,
+        mdaId,
+        createdBy,
+        createdDate,
+        createdDateStamp,
+        businessId,
+        terminalId,
+        pan)
+        VALUES
+        (#{transactionId},
+        #{transactionReference},
+        #{transactionDate},
+        #{transactionDescription},
+        #{totalAmountPaid},
+        #{serviceAmount},
+        #{fee},
+        #{commission},
+        #{transactionType},
+        #{channel},
+        #{customerName},
+        #{customerPhone},
+        #{customerEmail},
+        #{mdaId},
+        #{createdBy},
+        #{createdDate},
+        #{createdDateStamp},
+        #{businessId},
+        #{terminalId},
+        #{pan});
+    </insert>
+    <select id="AllTransactionsPaged" parameterType="PageFinder" resultType="AdminTransactionDto">
+        SELECT * FROM transactions_view WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        ORDER BY transactionDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllProjectTransactionsPaged" parameterType="PageFinder" resultType="AdminTransactionDto">
+        SELECT * FROM transactions_view WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY transactionDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllMdaTransactionsPaged" parameterType="PageFinder" resultType="TransactionDto">
+        SELECT * FROM transactions_view WHERE businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        <if test="agentId > 0">AND createdBy = #{agentId} </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY transactionDate
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="SearchTransactions" resultType="AdminTransactionDto" parameterType="Transaction">
+        SELECT * FROM transactions_view WHERE transactionId like #{transactionId} OR transactionReference like #{transactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail} ORDER BY transactionDate DESC ;
+    </select>
+    <select id="SearchProjectTransactions" resultType="TransactionDto" parameterType="Transaction">
+        SELECT * FROM transactions_view WHERE transactionId like #{transactionId} OR transactionReference like #{transactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail} AND businessId = #{businessId} ORDER BY transactionDate DESC;
+    </select>
+    <select id="SearchMdaTransactions" resultType="TransactionDto" parameterType="Transaction">
+        SELECT * FROM transactions_view WHERE transactionId like #{transactionId} OR transactionReference like #{transactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail} AND mdaId = #{mdaId} AND businessId = #{businessId}
+        <if test="createdBy > 0">AND createdBy = #{createdBy} </if>
+        ORDER BY transactionDate DESC;
+    </select>
+    <select id="SingleTransactionAdmin" resultType="AdminTransactionDto">
+        SELECT * FROM transactions_view WHERE transactionId = #{transactionId} OR transactionReference = #{transactionId};
+    </select>
+    <select id="SingleProjectTransactions" resultType="TransactionDto" parameterType="Transaction">
+        SELECT * FROM transactions_view WHERE transactionId = #{transactionId} OR transactionReference = #{transactionId} AND businessId = #{businessId};
+    </select>
+    <select id="SingleMdaTransactions" resultType="TransactionDto" parameterType="Transaction">
+        SELECT * FROM transactions_view WHERE transactionId = #{transactionId} OR transactionReference = #{transactionId} AND
+        businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="createdBy > 0">AND createdBy = #{createdBy} </if>;
+    </select>
+
+
+    <select id="CountAll" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(id) FROM transactions WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>;
+    </select>
+    <select id="CountProject" resultType="int">
+        SELECT COUNT(id) FROM transactions WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="CountMda" parameterType="PageFinder" resultType="int">
+        SELECT COUNT(id) FROM transactions WHERE businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        <if test="agentId > 0">AND createdBy = #{agentId} </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+    <select id="SumAll" parameterType="PageFinder" resultType="double">
+        SELECT SUM(totalAmountPaid) FROM transactions WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>;
+    </select>
+    <select id="SumChargeAll" parameterType="PageFinder" resultType="double">
+        SELECT SUM(commission) FROM transactions WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>;
+    </select>
+    <select id="SumNetAll" parameterType="PageFinder" resultType="double">
+        SELECT SUM(serviceAmount) FROM transactions WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>;
+    </select>
+    <select id="SumProject" resultType="double">
+        SELECT SUM(totalAmountPaid) FROM transactions WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="SumChargeProject" resultType="double">
+        SELECT SUM(commission) FROM transactions WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="SumNetProject" resultType="double">
+        SELECT SUM(serviceAmount) FROM transactions WHERE businessId = #{businessId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+    <select id="SumMda" parameterType="PageFinder" resultType="double">
+        SELECT SUM(totalAmountPaid) FROM transactions WHERE businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        <if test="agentId > 0">AND createdBy = #{agentId} </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+    <select id="SumChargeMda" parameterType="PageFinder" resultType="double">
+        SELECT SUM(commission) FROM transactions WHERE businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        <if test="agentId > 0">AND createdBy = #{agentId} </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+    <select id="SumNetMda" parameterType="PageFinder" resultType="double">
+        SELECT SUM(serviceAmount) FROM transactions WHERE businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        <if test="agentId > 0">AND createdBy = #{agentId} </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+    <select id="SumFeeMda" parameterType="PageFinder" resultType="double">
+        SELECT SUM(totalAmountPaid) FROM transactions WHERE businessId = #{businessId} AND mdaId = #{mdaId}
+        <if test="filter == 1">
+            <if test="filterBy == 'transactionType'">
+                AND transactionType = #{filterValue}
+            </if>
+            <if test="filterBy == 'channel'">
+                AND channel = #{filterValue}
+            </if>
+        </if>
+        <if test="agentId > 0">AND createdBy = #{agentId} </if>
+        AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+
+
+    <select id="DayCountAll" resultType="double" parameterType="Transaction">
+        SELECT COUNT(id) AS count FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate});
+    </select>
+    <select id="DayCountProject" resultType="double" parameterType="Transaction">
+        SELECT COUNT(id) AS count FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})  AND businessId = #{businessId};
+    </select>
+    <select id="DayCountMda" resultType="double" parameterType="Transaction">
+        SELECT COUNT(id) AS count FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})  AND businessId = #{businessId} AND mdaId = #{mdaId};
+    </select>
+    <select id="DaySumAll" resultType="double" parameterType="Transaction" >
+        SELECT SUM(totalAmountPaid) AS total FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate});
+    </select>
+    <select id="DaySumProject" resultType="double" parameterType="Transaction">
+        SELECT SUM(totalAmountPaid) AS total FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})  AND businessId = #{businessId};
+    </select>
+    <select id="DaySumMda" resultType="double" parameterType="Transaction">
+        SELECT SUM(totalAmountPaid) AS total FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})  AND businessId = #{businessId} AND mdaId = #{mdaId};
+    </select>
+
+
+
+
+    <select id="AllTransactionsDateRange" parameterType="PageFinder" resultType="TransactionDto">
+        SELECT * FROM transactions WHERE DATE(transactionDate) BETWEEN
+        DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY transactionDate DESC;
+    </select>
+
+    <select id="AllTransactionsDateRangePaged" parameterType="PageFinder" resultType="AdminTransactionDto">
+        SELECT * FROM transactions ORDER BY transactionDate DESC LIMIT #{from}, #{recordsPerPage} WHERE DATE(transactionDate) BETWEEN
+        DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>;
+    </select>
+    <select id="DateRangeTransactions" resultType="double" parameterType="Transaction">
+        SELECT COUNT(id) AS count, SUM(totalAmountPaid) AS total FROM transactions
+        <if test="mdaId > 0">
+            GROUP BY #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            GROUP BY #{businessId}
+        </if>
+        WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>;
+    </select>
+    <select id="SingleDateTransaction" resultType="DailyTransactionsDto" parameterType="Transaction">
+        SELECT COUNT(id) AS count, SUM(totalAmountPaid) AS total, UNIX_TIMESTAMP(transactionDate) AS transactionDate FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>;
+    </select>
+<!--    <select id="DateRangeSum" resultType="double" parameterType="Transaction" >-->
+<!--        SELECT SUM(totalAmountPaid) AS total FROM transactions WHERE DATE(transactionDate) = DATE(#{transactionDate});-->
+<!--    </select>-->
+</mapper>

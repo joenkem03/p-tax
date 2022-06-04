@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Business">
+
+    <insert id="NewPayChannel" parameterType="PaymentChannel">
+        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        INSERT INTO system_payment_channels
+        (name,
+        createdDate,
+        isActive,
+        createdBy)
+        VALUES
+        (#{name},
+        #{createdDate},
+        #{isActive},
+        #{createdBy});
+    </insert>
+
+    <select id="AllPayChannel" resultType="PaymentChannelDto">
+        SELECT * FROM system_payment_channels;
+    </select>
+    <select id="SinglePayChannel" resultType="PaymentChannel">
+        SELECT * FROM system_payment_channels WHERE id=#{id};
+    </select>
+    
+    <update id="ModifyChannelStatus" parameterType="PaymentChannel">
+        UPDATE system_payment_channels
+        SET
+        name = #{name},
+        createdDate = #{createdDate},
+        isActive = #{isActive},
+        createdBy = #{createdBy}
+        WHERE id = #{id};
+    </update>
+
+    <insert id="createBusiness" parameterType="Business">
+        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        INSERT INTO clients
+        (clientName,
+        clientLogo,
+        stateLgaId,
+        contactPerson,
+        contactPhone,
+        contactEmail,
+        fee,
+        commission,
+        isCommissionPercent,
+        createdBy,
+        createdDate)
+        VALUES
+        (#{clientName},
+        #{clientLogo},
+        #{stateLgaId},
+        #{contactPerson},
+        #{contactPhone},
+        #{contactEmail},
+        #{fee},
+        #{commission},
+        #{isCommissionPercent},
+        #{createdBy},
+        #{createdDate});
+
+    </insert>
+
+    <insert id="createBusinessPayChannel" parameterType="BusinessPaymentChannel">
+        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        INSERT INTO client_channel
+        (businessId,
+        channelId,
+        createdDate,
+        createdBy)
+        VALUES
+        (#{businessId},
+        #{channelId},
+        #{createdDate},
+        #{createdBy});
+    </insert>
+
+    <update id="UpdateBusiness" parameterType="UpdateBusinessDto">
+        UPDATE clients
+        SET
+        clientName = #{clientName},
+        clientLogo = #{clientLogo},
+        stateLgaId = #{stateLgaId},
+        contactPerson = #{contactPerson},
+        contactPhone = #{contactPhone},
+        contactEmail = #{contactEmail},
+        createdBy = #{createdBy},
+        createdDate = #{createdDate},
+        updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate},
+        isActive = #{isActive},
+        isRebateEnabled = #{isRebateEnabled}
+        WHERE id = #{id};
+    </update>
+    
+    <select id="BusPayChannels" resultType="BusinessPaymentChannelDto">
+        SELECT client_channel.id,
+        client_channel.businessId,
+        client_channel.channelId,
+        client_channel.createdDate,
+        client_channel.createdBy,
+        client_channel.updatedBy,
+        client_channel.updatedDate,
+        system_payment_channels.name
+        FROM client_channel LEFT JOIN system_payment_channels ON client_channel.channelId = system_payment_channels.id
+        <if test="businessId > 0">
+            WHERE client_channel.businessId = #{id} AND system_payment_channels.isActive = 1 AND client_channel.isActive = 1
+        </if>;
+    </select>
+
+
+    <select id="SingleBusPayChannel" resultType="BusinessPaymentChannel">
+        SELECT id,
+        businessId,
+        channelId,
+        createdDate,
+        createdBy,
+        updatedBy,
+        updatedDate,
+        FROM client_channel WHERE id = #{id} AND client_channel.isActive =1;
+    </select>
+    
+    <update id="UpdateBusinessPayChannel" parameterType="BusinessPaymentChannel">
+        UPDATE client_channel
+        SET
+        updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate}
+        isActive = #{isActive}
+        WHERE id = #{id};
+    </update>
+
+<!--    <update id="UpdateBusinessPayChannel" parameterType="BusinessPaymentChannel">-->
+<!--        UPDATE client_channel-->
+<!--        SET-->
+<!--        businessId = #{businessId},-->
+<!--        channelId = #{channelId},-->
+<!--        createdDate = #{createdDate},-->
+<!--        createdBy = #{createdBy},-->
+<!--        updatedBy = #{updatedBy},-->
+<!--        updatedDate = #{updatedDate}-->
+<!--        isActive = #{isActive}-->
+<!--        WHERE id = #{id};-->
+<!--    </update>-->
+
+    <select id="businessCheck" parameterType="CreateBusinessDto" resultType="Business">
+        SELECT * FROM clients WHERE stateLgaId = #{stateLgaId} AND clientName = #{clientName};
+    </select>
+
+    <select id="businessById" parameterType="int" resultType="ProjectSummary">
+        SELECT * FROM clients WHERE id = #{id};
+    </select>
+
+    <select id="businessByIdz" parameterType="int" resultType="Business">
+        SELECT * FROM clients WHERE id = #{id};
+    </select>
+
+    <select id="businessRevenue" parameterType="int" resultType="Business">
+        SELECT * FROM clients WHERE id = #{id};
+    </select>
+
+    <select id="businessRevenueSum" parameterType="int" resultType="ProjectSummary">
+        SELECT * FROM project_summary WHERE businessId = #{id};
+    </select>
+
+    <select id="businessRevenueSumAll" parameterType="int" resultType="ProjectSummary">
+        SELECT SUM(totalAmountPaid) AS totalAmountPaid, SUM(serviceAmount) AS serviceAmount, SUM(commission) AS commission, SUM(fee) AS fee FROM project_summary;
+    </select>
+
+    <select id="clients" parameterType="PageFinder" resultType="BusinessDto">
+        SELECT clients.id AS id, clients.clientName AS clientName, clients.clientLogo AS clientLogo, clients.createdDate AS dateOnBoarded, clients.contactPerson AS contactPerson,
+        clients.contactPhone AS contactPhone, clients.contactEmail AS contactEmail, states.name AS state, local_governments.name AS office FROM clients LEFT JOIN local_governments
+        ON clients.stateLgaId = local_governments.id LEFT JOIN states ON local_governments.state_id = states.id ORDER BY states.name ASC;
+    </select>
+
+    <select id="clientsSearch" parameterType="Business" resultType="BusinessDto">
+        SELECT clients.id AS id, clients.clientName AS clientName, clients.clientLogo AS clientLogo, clients.createdDate AS dateOnBoarded, clients.contactPerson AS contactPerson,
+        clients.contactPhone AS contactPhone, clients.contactEmail AS contactEmail, states.name AS state, local_governments.name AS office FROM clients LEFT JOIN local_governments
+        ON clients.stateLgaId = local_governments.id LEFT JOIN states ON local_governments.state_id = states.id WHERE clients.clientName LIKE #{clientName} OR clients.contactPerson
+        LIKE #{contactPerson} OR clients.contactPhone LIKE #{contactPhone} OR clients.contactEmail LIKE #{contactEmail} ORDER BY states.name ASC;
+    </select>
+
+    <select id="clientsPaged" parameterType="PageFinder" resultType="BusinessDto">
+        SELECT clients.id AS id, clients.clientName AS clientName, clients.clientLogo AS clientLogo, clients.createdDate AS dateOnBoarded, clients.contactPerson AS contactPerson,
+        clients.contactPhone AS contactPhone, clients.contactEmail AS contactEmail, states.name AS state, local_governments.name AS office FROM clients LEFT JOIN local_governments
+        ON clients.stateLgaId = local_governments.id LEFT JOIN states ON local_governments.state_id = states.id ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="singleClients" parameterType="PageFinder" resultType="BusinessDto">
+        SELECT clients.id AS id, clients.clientName AS clientName, clients.clientLogo AS clientLogo, clients.createdDate AS dateOnBoarded, clients.contactPerson AS contactPerson,
+        clients.contactPhone AS contactPhone, clients.contactEmail AS contactEmail, states.name AS state, local_governments.name AS office FROM clients LEFT JOIN local_governments
+        ON clients.stateLgaId = local_governments.id LEFT JOIN states ON local_governments.state_id = states.id WHERE clients.id = #{mdaId};
+    </select>
+
+<!--    <select id="singleClientsAlt" parameterType="PageFinder" resultType="BusinessDto">-->
+<!--        SELECT clients.id AS id, clients.clientName AS clientName, clients.clientLogo AS clientLogo, clients.createdDate AS dateOnBoarded, clients.contactPerson AS contactPerson,-->
+<!--        clients.contactPhone AS contactPhone, clients.contactEmail AS contactEmail, states.name AS state, local_governments.name AS office FROM clients LEFT JOIN local_governments-->
+<!--        ON clients.stateLgaId = local_governments.id LEFT JOIN states ON local_governments.state_id = states.id ORDER BY states.name ASC; WHERE clients.id = #{mdaId};-->
+<!--    </select>-->
+
+    <select id="getCountClient" resultType="int">
+        SELECT COUNT(id) FROM clients ;
+    </select>
+
+    <select id="getStates" resultType="StateDto">
+        SELECT id, name FROM states;
+    </select>
+    <select id="getAllLgas" resultType="AllLgaDto">
+        SELECT id, state_id AS stateId, name FROM local_governments;
+    </select>
+    <select id="getLgas" resultType="LgaDto" parameterType="LgaDto">
+        SELECT id, name FROM local_governments WHERE state_id = #{id};
+    </select>
+    <select id="searchStates" resultType="StateDto" parameterType="StateDto">
+        SELECT id, name FROM states WHERE name LIKE #{name};
+    </select>
+    <select id="searchLgas" resultType="LgaDto" parameterType="LgaDto">
+        SELECT id, name FROM local_governments WHERE state_id = #{id} AND name LIKE #{name};
+    </select>
+
+
+    <select id="getCountClientMonthly" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM clients WHERE createdDate = YEAR(#{createdDate}) AND transactionMonthNo = MONTH(#{createdDate});
+    </select>
+</mapper>

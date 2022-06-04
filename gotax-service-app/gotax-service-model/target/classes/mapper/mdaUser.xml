@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MdaUser">
+
+    <insert id="insert" parameterType="MdaUser">
+        <!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+        <!--            select last_insert_id();-->
+        <!--        </selectKey>-->
+        INSERT INTO mda_users
+        (mdaId, userId, canCollect, collectionLimit, canView, createdBy, createdDate, updatedBy, updatedDate, mdaOfficeId)
+        VALUES
+        (#{mdaId}, #{userId}, #{canCollect}, #{collectionLimit}, #{canView}, #{createdBy}, #{createdDate}, #{updatedBy}, #{updatedDate}, #{mdaOfficeId});
+    </insert>
+
+    <update id="update" parameterType="MdaUser">
+        UPDATE mda_users
+        SET
+        id = #{id}, mdaId = #{mdaId}, userId = #{userId}, canCollect = #{canCollect}, collectionLimit = #{collectionLimit}, canView = #{canView}, mdaOfficeId = #{mdaOfficeId},
+        createdBy = #{createdBy}, createdDate = #{createdDate}, updatedBy = #{updatedBy}, updatedDate = #{updatedDate}, isActive = #{isActive} WHERE id = #{id};
+    </update>
+
+    <select id="Id" resultType="MdaUser" resultOrdered="true">
+        SELECT * FROM mda_users WHERE id=#{id} AND isActive = 1;
+    </select>
+
+    <select id="userId" resultType="MdaUser" resultOrdered="true">
+        SELECT * FROM mda_users WHERE userId=#{userId} AND isActive = 1;
+    </select>
+
+    <select id="getByUserId" resultType="UserMdaDto" parameterType="MdaUser">
+        SELECT * FROM mda_users WHERE userId=#{userId} AND isActive = 1;
+    </select>
+
+    <select id="getByUserIdJoin" resultType="UserMdaDto" parameterType="MdaUser">
+        SELECT mdaId, userId, mda_users.mdaOfficeId, collectionLimit, canCollect, name as mda, clientName as project, clients.isActive as clientActive, clientLogo,
+        mdas.isActive as mdaActive, businessId FROM mda_users left join mdas on mda_users.mdaId = mdas.id left join clients on mdas.businessId = clients.id
+        WHERE mda_users.userId=#{userId} AND mda_users.isActive = 1;
+    </select>
+
+    <select id="getByMdaUserId" resultType="int" resultOrdered="true">
+        SELECT id FROM mda_users WHERE mdaId = #{mdaId} AND userId = #{userId} AND isActive = 1;
+    </select>
+
+    <select id="searchMdaUser" resultType="MdaUser">
+        SELECT * FROM mda_users WHERE name like #{name} OR mdaCode like #{mdaCode} AND isActive = 1
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="countAllMdaUsers" resultType="int">
+        SELECT SUM(mdaUsers) FROM mda_users_count_view;
+    </select>
+
+    <select id="countMdaUsers" resultType="int">
+        SELECT mdaUsers FROM mda_users_count_view WHERE mdaId = #{id};
+    </select>
+
+    <select id="countMdaUsersCan" resultType="int" parameterType="MdaUser">
+        SELECT COUNT(id) FROM mda_users WHERE mdaId = #{mdaId} AND canCollect = #{canCollect} AND isActive = #{isActive};
+    </select>
+
+<!--    <select id="countAllMdaUsers" resultType="MdaUser" resultOrdered="true">-->
+<!--        SELECT COUNT(id) FROM mda_users WHERE isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="countMdaUsers" resultType="MdaUser" resultOrdered="true">-->
+<!--        SELECT COUNT(id) FROM mda_users WHERE mdaId = #{id} AND isActive = 1;-->
+<!--    </select>-->
+</mapper>

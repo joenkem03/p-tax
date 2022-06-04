@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PosTransaction">
+
+    <insert id="insert" parameterType="PosTransaction">
+        INSERT INTO pos_transactions
+        (posId, operatorId, customerId, customerName, customerPhone, customerEmail, assessmentId, mdaServiceId, transactionId, offlineTransactionId,
+        transactionDate, amountPaid, remittanceId, createdBy, createdDate, transactionStatus, mdaId, invoiceNo, businessId)
+        VALUES
+        (#{posId}, #{operatorId}, #{customerId}, #{customerName}, #{customerPhone}, #{customerEmail}, #{assessmentId}, #{mdaServiceId}, #{transactionId},
+        #{offlineTransactionId}, #{transactionDate}, #{amountPaid}, #{remittanceId}, #{createdBy}, #{createdDate}, #{transactionStatus}, #{mdaId}, #{invoiceNo},
+        #{businessId});
+
+    </insert>
+    <update id="updateRem" parameterType="PosTransaction">
+        UPDATE pos_transactions
+        SET
+            remittanceId = #{remittanceId},
+            updatedBy = #{updatedBy},
+            updatedDate = #{updatedDate}
+        WHERE id = #{id}
+    </update>
+    <update id="updateRemBatch" parameterType="org.bizzdeskgroup.Dtos.Command.UpdateTransactionRem">
+        <foreach item="item" collection="list" open="" close="" separator="">
+            UPDATE pos_transactions SET updatedDate = #{item.updatedDate},  remittanceId = #{item.remittanceId}, updatedBy = #{item.updatedBy} WHERE id = #{item.id};
+        </foreach>
+    </update>
+    <select id="AllTransaction" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT * FROM pos_transactions_view WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllTransactionMda" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT * FROM pos_transactions_view WHERE mdaId = #{mdaId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="AllTransactionProject" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT * FROM pos_transactions_view WHERE businessId = #{businessId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate}) ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+<!--    <select id="SearchTransaction" resultType="PosTransactionDto" parameterType="PageFinder"></select>-->
+    <select id="SearchTransactionMda" resultType="PosTransactionDto" parameterType="PageFinder"></select>
+
+    <select id="AgentTransactionUnlimited" resultType="PosTransaction" parameterType="PageFinder">
+    SELECT * FROM pos_transactions WHERE mdaId = #{mdaId} AND operatorId = #{agentId} AND remittanceId = 0 AND isActive = 1
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="AgentTransactionUnRemitted" resultType="PosTransaction" parameterType="PageFinder">
+        SELECT * FROM pos_transactions WHERE createdDate &lt;= #{orderBy} AND operatorId = #{agentId} AND remittanceId = 0 AND isActive = 1
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+<!--    <select id="AgentTransactionUnRemitted" resultType="PosTransaction" parameterType="PageFinder">-->
+<!--        SELECT * FROM pos_transactions WHERE date(createdDate) &lt;= date(#{orderBy}) AND operatorId = #{agentId} AND remittanceId = 0 AND isActive = 1;-->
+<!--    </select>-->
+
+    <select id="AllTransactionByRem" resultType="PosTransactionDto" >
+        SELECT * FROM pos_transactions_view WHERE remittanceId = #{id} AND isActive = 1;
+    </select>
+    <select id="AgentTransaction" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT * FROM pos_transactions_view WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate})
+        <if test="payerId > 0">
+            AND customerId = #{payerId}
+        </if>
+        <if test="agentId > 0">
+            AND operatorId = #{agentId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        DESC <if test="recordsPerPage > 0">LIMIT #{from}, #{recordsPerPage}</if>;
+    </select>
+    <select id="SearchTransaction" resultType="PosTransactionDto" parameterType="PosTransaction">
+        SELECT * FROM pos_transactions_view WHERE transactionId like #{transactionId} OR offlineTransactionId like #{offlineTransactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail};
+    </select>
+    <select id="SearchAgentTransaction" resultType="PosTransactionDto" parameterType="PosTransaction">
+        SELECT * FROM pos_transactions_view WHERE transactionId like #{transactionId} OR offlineTransactionId like #{offlineTransactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail} AND mdaId = #{mdaId} AND operatorId = #{operatorId}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="SearchMdaTransaction" resultType="PosTransactionDto" parameterType="PosTransaction">
+        SELECT * FROM pos_transactions_view WHERE transactionId like #{transactionId} OR offlineTransactionId like #{offlineTransactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail} AND mdaId = #{mdaId}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="SearchMegaTransaction" resultType="PosTransactionDto" parameterType="PosTransaction">
+        SELECT * FROM pos_transactions_view WHERE (transactionId like #{transactionId} OR offlineTransactionId like #{offlineTransactionId} OR customerName like #{customerName}
+        OR customerPhone like #{customerPhone} OR customerEmail like #{customerEmail})
+        <if test="customerId > 0">
+            AND customerId = #{customerId}
+        </if>
+        <if test="operatorId > 0">
+            AND operatorId = #{operatorId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+    <select id="singleTransaction"  resultType="PosTransactionDto">
+        SELECT * FROM pos_transactions_view WHERE transactionId = #{transactionId}
+    </select>
+    <select id="singleTransactionOff" resultType="PosTransactionDto">
+        SELECT * FROM pos_transactions_view WHERE offlineTransactionId = #{offlineTransactionId} OR transactionId = #{transactionId}
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>
+    </select>
+    <select id="singleAgentTransaction" parameterType="PosTransaction" resultType="PosTransactionDto">
+        SELECT * FROM pos_transactions_view WHERE transactionId = #{transactionId} AND mdaId = #{mdaId}
+    </select>
+
+
+    <select id="getCountAgent" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM pos_transactions WHERE operatorId = #{agentId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+    <select id="getCountMda" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM pos_transactions WHERE mdaId = #{mdaId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+    <select id="getCountProject" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM pos_transactions WHERE businessId = #{businessId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+    <select id="getCount" resultType="int" parameterType="PageFinder">
+        SELECT COUNT(id) FROM pos_transactions WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+
+
+    <select id="getSumAgent" resultType="double" parameterType="PageFinder">
+        SELECT SUM(amountPaid) FROM pos_transactions WHERE operatorId = #{agentId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+    <select id="getSumMda" resultType="double" parameterType="PageFinder">
+        SELECT SUM(amountPaid) FROM pos_transactions WHERE mdaId = #{mdaId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+    <select id="getSumProject" resultType="double" parameterType="PageFinder">
+        SELECT SUM(amountPaid) FROM pos_transactions WHERE businessId = #{businessId} AND DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+    <select id="getSum" resultType="double" parameterType="PageFinder">
+        SELECT SUM(amountPaid) FROM pos_transactions WHERE DATE(transactionDate) BETWEEN DATE(#{startTransactionDate}) AND DATE(#{endTransactionDate});
+    </select>
+
+
+
+    <select id="DayCountAgent" resultType="double" parameterType="PosTransaction">
+        SELECT COUNT(id) AS count FROM pos_transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})  AND operatorId = #{operatorId} AND mdaId = #{mdaId};
+    </select>
+    <select id="DaySumAgent" resultType="double" parameterType="PosTransaction">
+        SELECT SUM(amountPaid) AS total FROM pos_transactions WHERE DATE(transactionDate) = DATE(#{transactionDate})  AND operatorId = #{operatorId} AND mdaId = #{mdaId};
+    </select>
+
+
+    <select id="getAgentUnremSum" resultType="double" parameterType="PosTransaction">
+        SELECT SUM(amountPaid) FROM pos_transactions WHERE operatorId = #{operatorId} AND mdaId = #{mdaId} AND remittanceId = #{remittanceId};
+    </select>
+
+
+    <select id="getAgentUnremCount" resultType="int" parameterType="PosTransaction">
+        SELECT COUNT(id) FROM pos_transactions WHERE operatorId = #{operatorId} AND mdaId = #{mdaId} AND remittanceId = #{remittanceId};
+    </select>
+</mapper>

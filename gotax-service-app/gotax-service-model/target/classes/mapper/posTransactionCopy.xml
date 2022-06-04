@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PosTransaction">
+
+    <insert id="insert" parameterType="PosTransaction">
+        INSERT INTO pos_transactions
+        (posId, operatorId, customerId, customerName, customerPhone, customerEmail, assessmentId, mdaServiceId, transactionId, offlineTransactionId,
+        transactionDate, amountPaid, remittanceId, createdBy, createdDate, TransactionStatus, mdaId)
+        VALUES
+        (#{posId}, #{operatorId}, #{customerId}, #{customerName}, #{customerPhone}, #{customerEmail}, #{assessmentId}, #{mdaServiceId}, #{transactionId},
+        #{offlineTransactionId}, #{transactionDate}, #{amountPaid}, #{remittanceId}, #{createdBy}, #{createdDate}, #{TransactionStatus}, #{mdaId});
+
+    </insert>
+    <update id="update" parameterType="PosTransaction"></update>
+    <select id="AllTransaction" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT pos_transactions.id AS id, pos_transactions.posId As posId, pos_transactions.operatorId AS operatorId, pos_transactions.customerId AS customerId,
+        pos_transactions.customerName AS customerName, pos_transactions.customerPhone AS customerPhone, pos_transactions.customerEmail AS customerEmail,
+        pos_transactions.assessmentId AS assessmentId, pos_transactions.mdaServiceId AS mdaServiceId, pos_transactions.transactionId AS transactionId,
+        pos_transactions.TransactionStatus AS TransactionStatus, pos_transactions.offlineTransactionId AS offlineTransactionId, pos_transactions.transactionDate AS transactionDate,
+        pos_transactions.amountPaid AS amountPaid, mda_services.name AS AssesedService, mda_services.code AS AssesedServiceCode, poses.posDeviceSerial AS posDeviceSerial, users.firstName AS operatorFirstName,
+        users.lastName AS operatorLastName
+        FROM pos_transactions LEFT JOIN poses ON pos_transactions.posId = poses.id LEFT JOIN mda_services ON pos_transactions.mdaServiceId = mda_services.id LEFT JOIN users ON
+        pos_transactions.operatorId = users.id ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        DESC LIMIT #{from}, #{recordsPerPage};
+    </select>
+    <select id="AllTransactionMda" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT pos_transactions.id AS id, pos_transactions.posId As posId, pos_transactions.operatorId AS operatorId, pos_transactions.customerId AS customerId,
+        pos_transactions.customerName AS customerName, pos_transactions.customerPhone AS customerPhone, pos_transactions.customerEmail AS customerEmail,
+        pos_transactions.assessmentId AS assessmentId, pos_transactions.mdaServiceId AS mdaServiceId, pos_transactions.transactionId AS transactionId,
+        pos_transactions.TransactionStatus AS TransactionStatus, pos_transactions.offlineTransactionId AS offlineTransactionId, pos_transactions.transactionDate AS transactionDate,
+        pos_transactions.amountPaid AS amountPaid, mda_services.name AS AssesedService, mda_services.code AS AssesedServiceCode, poses.posDeviceSerial AS posDeviceSerial, users.firstName AS operatorFirstName,
+        users.lastName AS operatorLastName
+        FROM pos_transactions LEFT JOIN poses ON pos_transactions.posId = poses.id LEFT JOIN mda_services ON pos_transactions.mdaServiceId = mda_services.id LEFT JOIN users ON
+        pos_transactions.operatorId = users.id WHERE pos_transactions.mdaId = #{mdaId} ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        DESC LIMIT #{from}, #{recordsPerPage};
+    </select>
+    <select id="SearchTransaction" resultType="PosTransactionDto" parameterType="PageFinder"></select>
+    <select id="SearchTransactionMda" resultType="PosTransactionDto" parameterType="PageFinder"></select>
+    <select id="AgentTransaction" resultType="PosTransactionDto" parameterType="PageFinder">
+        SELECT pos_transactions.id AS id, pos_transactions.posId As posId, pos_transactions.operatorId AS operatorId, pos_transactions.customerId AS customerId,
+        pos_transactions.customerName AS customerName, pos_transactions.customerPhone AS customerPhone, pos_transactions.customerEmail AS customerEmail,
+        pos_transactions.assessmentId AS assessmentId, pos_transactions.mdaServiceId AS mdaServiceId, pos_transactions.transactionId AS transactionId,
+        pos_transactions.TransactionStatus AS TransactionStatus, pos_transactions.offlineTransactionId AS offlineTransactionId, pos_transactions.transactionDate AS transactionDate,
+        pos_transactions.amountPaid AS amountPaid, mda_services.name AS AssesedService, mda_services.code AS AssesedServiceCode, poses.posDeviceSerial AS posDeviceSerial, users.firstName AS operatorFirstName,
+        users.lastName AS operatorLastName
+        FROM pos_transactions LEFT JOIN poses ON pos_transactions.posId = poses.id LEFT JOIN mda_services ON pos_transactions.mdaServiceId = mda_services.id LEFT JOIN users ON
+        pos_transactions.operatorId = users.id WHERE pos_transactions.mdaId = #{mdaId} AND pos_transactions.operatorId = #{agentId} ORDER
+        BY
+        <if test="orderBy == null">
+            pos_transactions.id
+        </if>
+        <if test="orderBy != null">
+            #{orderBy}
+        </if>
+        DESC LIMIT #{from}, #{recordsPerPage};
+    </select>
+    <select id="SearchAgentTransaction" resultType="PosTransactionDto" parameterType="PosTransaction"></select>
+    <select id="singleTransaction" resultType="PosTransactionDto">
+        SELECT pos_transactions.id AS id, pos_transactions.posId As posId, pos_transactions.operatorId AS operatorId, pos_transactions.customerId AS customerId,
+        pos_transactions.customerName AS customerName, pos_transactions.customerPhone AS customerPhone, pos_transactions.customerEmail AS customerEmail,
+        pos_transactions.assessmentId AS assessmentId, pos_transactions.mdaServiceId AS mdaServiceId, pos_transactions.transactionId AS transactionId,
+        pos_transactions.TransactionStatus AS TransactionStatus, pos_transactions.offlineTransactionId AS offlineTransactionId, pos_transactions.transactionDate AS transactionDate,
+        pos_transactions.amountPaid AS amountPaid, mda_services.name AS AssesedService, mda_services.code AS AssesedServiceCode, poses.posDeviceSerial AS posDeviceSerial, users.firstName AS operatorFirstName,
+        users.lastName AS operatorLastName
+        FROM pos_transactions LEFT JOIN poses ON pos_transactions.posId = poses.id LEFT JOIN mda_services ON pos_transactions.mdaServiceId = mda_services.id LEFT JOIN users ON
+        pos_transactions.operatorId = users.id WHERE pos_transactions.offlineTransactionId = #{offlineTransactionId} OR pos_transactions.transactionId = #{transactionId}
+    </select>
+
+
+    <select id="getCountAgent" resultType="int">
+        SELECT COUNT(Id) FROM pos_transactions WHERE operatorId = #{agentId};
+    </select>
+
+
+    <select id="getCountMda" resultType="int">
+        SELECT COUNT(Id) FROM pos_transactions WHERE mdaId = #{mdaId};
+    </select>
+
+    <select id="getCount" resultType="int">
+        SELECT COUNT(Id) FROM pos_transactions;
+    </select>
+</mapper>

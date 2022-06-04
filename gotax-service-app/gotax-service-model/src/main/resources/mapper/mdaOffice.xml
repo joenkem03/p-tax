@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MdaOffice">
+
+<!--    <insert id="insert" parameterType="MdaOffice">-->
+<!--        &lt;!&ndash;        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">&ndash;&gt;-->
+<!--        &lt;!&ndash;            select last_insert_id();&ndash;&gt;-->
+<!--        &lt;!&ndash;        </selectKey>&ndash;&gt;-->
+<!--        INSERT INTO mda_offices (name, mdaId, officeCode, isHq, location, latLong, createdBy, createdDate)-->
+<!--        VALUES (#{name}, #{mdaId}, #{officeCode}, #{isHq}, #{location}, #{latLong}, #{createdBy}, #{createdDate});-->
+<!--    </insert>-->
+
+    <insert id="insert" parameterType="MdaOffice">
+        <!--        <selectKey keyProperty="id" keyColumn="id" resultType="int" order="AFTER">-->
+        <!--            select last_insert_id();-->
+        <!--        </selectKey>-->
+        INSERT INTO mda_offices (name, mdaId, officeCode, isHq, createdBy, createdDate, isActive, businessId)
+        VALUES (#{name}, #{mdaId}, #{officeCode}, #{isHq}, #{createdBy}, #{createdDate}, #{isActive}, #{businessId});
+    </insert>
+
+<!--    <update id="update" parameterType="MdaOffice">-->
+<!--        UPDATE mda_offices SET name = #{name}, officeCode = #{officeCode}, isHq = #{isHq},  isActive = #{isActive}, updatedBy = #{updatedBy},-->
+<!--        updatedDate = #{updatedDate}, location = #{location}, latLong = #{latLong} WHERE id = #{id};-->
+<!--    </update>-->
+
+    <update id="update" parameterType="MdaOffice">
+        UPDATE mda_offices SET name = #{name}, officeCode = #{officeCode}, isHq = #{isHq},  isActive = #{isActive}, updatedBy = #{updatedBy},
+        updatedDate = #{updatedDate} WHERE id = #{id};
+    </update>
+
+    <select id="getMdaOfficeById" resultType="MdaOffice" resultOrdered="true">
+        SELECT * FROM mda_offices WHERE id=#{id} AND isActive = 1;
+    </select>
+
+    <select id="getMdaOfficeByMdaId" resultType="MdaOffice" resultOrdered="true">
+        SELECT * FROM mda_offices WHERE mdaId=#{id} AND isActive = 1;
+    </select>
+
+    <select id="getMdaOfficeByIdnMdaId" resultType="MdaOffice" resultOrdered="true">
+        SELECT id FROM mda_offices WHERE id=#{mdaOfficeId} AND mdaId = #{mdaId} AND isActive = 1;
+    </select>
+
+    <select id="getMdaOfficeByNameOrCode" resultType="MdaOffice" resultOrdered="true" parameterType="MdaOffice">
+        SELECT id FROM mda_offices WHERE (name = #{name} OR officeCode = #{officeCode}) And businessId = #{businessId} AND isActive = 1;
+    </select>
+
+    <select id="searchMdaOffice" resultType="MdaOffice">
+        SELECT * FROM mda_offices WHERE name like #{name} OR officeCode like #{officeCode} AND mdaId = #{mdaId} AND isActive = 1;
+    </select>
+
+<!--    <select id="getCountAllMdaOffices" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM mda_offices WHERE isActive = 1;-->
+<!--    </select>-->
+
+<!--    <select id="getCountMdaOffices" resultType="int">-->
+<!--        SELECT COUNT(Id) FROM mda_offices WHERE mdaId = #{id} AND isActive = 1;-->
+<!--    </select>-->
+
+
+    <select id="getCountAllMdaOffices" resultType="int">
+        SELECT SUM(mdaOffices) FROM mda_offices_count_view;
+    </select>
+
+    <select id="getCountAllMdaOfficesMega" resultType="int" parameterType="PageFinder">
+        SELECT SUM(mdaOffices) FROM mda_offices_count_view WHERE 1=1
+        <if test="businessId > 0">
+            AND businessId = #{businessId}
+        </if>
+        <if test="mdaId > 0">
+            AND mdaId = #{mdaId}
+        </if>;
+    </select>
+
+    <select id="getCountMdaOffices" resultType="int">
+        SELECT mdaOffices FROM mda_offices_count_view WHERE mdaId = #{id};
+    </select>
+
+    <select id="getAllPagedx" resultType="MdaOfficeDto" parameterType="MdaOffice">
+        SELECT * FROM mda_offices WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdaOfficesWhereLikex" resultType="MdaOfficeDto">
+        SELECT * FROM mda_offices WHERE name like #{name} OR officeCode like #{officeCode} AND mdaId = #{mdaId} AND isActive = 1 order by #{sortBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+
+    <select id="getAllPaged" resultType="MdaOfficeDto" parameterType="PageFinder">
+        SELECT * FROM mda_offices WHERE mdaId = #{mdaId} AND isActive = 1 ORDER BY #{orderBy}
+        <if test="orderBy == null">
+            , id
+        </if>
+        ASC
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+
+    <select id="getMdaOfficesWhereLike" parameterType="MdaOffice" resultType="MdaOfficeDto">
+        SELECT * FROM mda_offices WHERE name like #{name} OR officeCode like #{officeCode} AND mdaId = #{mdaId} AND isActive = 1
+        <if test="recordsPerPage > 0">
+            LIMIT #{from}, #{recordsPerPage}
+        </if>;
+    </select>
+</mapper>
